@@ -8,6 +8,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Button from '@mui/material/Button';
 import { Category } from '@mui/icons-material';
 import { Checkbox, FormControlLabel, FormGroup } from '@mui/material';
+import { CategorizeIngredients } from '../util/CategorizeIngredients';
 
 
 // const ingredients=[
@@ -36,7 +37,8 @@ const demo = [
     }
 ]
 
-const MenuCard = () => {
+const MenuCard = ({item}) => {
+        // console.log("Items ", item)
     const handleCheckBoxChange =(value)=>{
         console.log("value")
     }
@@ -49,11 +51,11 @@ const MenuCard = () => {
             >
                 <div className='lg:flex items-center justify-between'>
                     <div className='lg:flex items-center lg:gap-5'>
-                        <img className='w-[7rem] h-[7rem] object-cover' src="https://images.pexels.com/photos/3738730/pexels-photo-3738730.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="" />
+                        <img className='w-[7rem] h-[7rem] object-cover' src={item.images[0]} alt="" />
                         <div className='space-y-1 lg:space-y-5 lg:az-w-2xl'>
-                            <p className='font=semibold text=xl'>Burget</p>
-                            <p>₹499</p>
-                            <p className='text-gray-400'>Nice Burger</p>
+                            <p className='font=semibold text=xl'>{item.name}</p>
+                            <p>{item.price}</p>
+                            <p className='text-gray-400'>{item.description}</p>
                         </div>
 
 
@@ -65,20 +67,24 @@ const MenuCard = () => {
             </AccordionSummary>
             <AccordionDetails>
                 <form >
-                    <div className='flex gap-5 flex-wrap'   >
-                        {
-                            demo.map((item) =>
-                                <div>
-                                    <p>{item.category}</p>
-                                    <FormGroup>
-                                        {
-                                            item.ingredient.map((item) => <FormControlLabel control={<Checkbox onChange={()=>handleCheckBoxChange(item)}/>} label={item} />)
-                                        }
-                                    </FormGroup>
-                                </div>
-                            )
-                        }
-                    </div>
+                <div className='flex gap-5 flex-wrap'>
+        {
+            Object.keys(CategorizeIngredients(item.ingredientsItems )).map((category) => (
+                <div key={item.category}>
+                    <p className='font-semibold mb-2'>{category}</p>
+                    <FormGroup>
+                        {CategorizeIngredients(item.ingredientsItems )[category].map((item) => (
+                            <FormControlLabel
+                                key={item.name}
+                                control={<Checkbox onChange={() => handleCheckBoxChange(item)} />}
+                                label={item.name}
+                            />
+                        ))}
+                    </FormGroup>
+                </div>
+            ))
+        }
+    </div>
                     <div className='pt-5'>
                         <Button variant='contained' disabled={false} type='submit'>{true?"Add to Cart":"Out of Stock"}</Button>
                     </div>

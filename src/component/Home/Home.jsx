@@ -1,11 +1,22 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "./Home.css";
 import MultiItemCarousel from "./MultiItemCarousel";
 import RestaurantCart from "../Restaurant/RestaurantCart";
+import { useDispatch, useSelector } from "react-redux";
+import { getAllRestaurantsAction } from "../State/Restaurant/Action";
 
 const restaurant = [1, 1, 1, 1, 1, 1];
 
 const Home = () => {
+  const dispatch = useDispatch();
+  const jwt =localStorage.getItem("jwt")
+  const {restaurants} = useSelector(store=>store.restaurant)
+
+  console.log("restaurants ", restaurants);
+
+  useEffect(()=>{
+    dispatch(getAllRestaurantsAction(jwt))
+  },[])
   return (
     <div className="pb-10">
       {/* Banner Section */}
@@ -38,8 +49,8 @@ const Home = () => {
         </h1>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 justify-center">
-          {restaurant.map((item, index) => (
-            <RestaurantCart key={index} />
+          {restaurants.map((item, index) => (
+            <RestaurantCart key={index} item={item} />
           ))}
         </div>
       </section>

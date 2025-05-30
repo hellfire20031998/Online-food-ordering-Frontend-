@@ -23,7 +23,6 @@ const Profile = () => {
             <Route path='/address' element={<Address/>}/>
             <Route path='/favorites' element={<Favorities/>}/>
             <Route path='/events' element={<Events/>}/>
-
           </Routes>
 
         </div>

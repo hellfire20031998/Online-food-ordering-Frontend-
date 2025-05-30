@@ -8,7 +8,7 @@ const initialState = {
     isLoading: false,
     error: null,
     jwt: null,
-    favorites: null,
+    favorites: [],
     success: null
 }
 export const authReducer = (state = initialState, action) => {
@@ -24,13 +24,15 @@ export const authReducer = (state = initialState, action) => {
         case REGISTER_SUCCESS:
         case LOGIN_SUCCESS:
             return { ...state, isLoading: false, jwt: action.payload, success: "Register Success" }
-        
-            case GET_USER_SUCCESS:
-                return { ...state, isLoading: false, user: action.payload }
-    
+
+        case GET_USER_SUCCESS:
+            return { ...state, isLoading: false, user: action.payload, favorites: action.payload.favorites }
+
 
         case ADD_TO_FAVORITE_SUCCESS:
             return { ...state, isLoading: false, error: null, favorites: isPresentInFavorites(state.favorites, action.payload) ? state.favorites.filter((item) => item.id !== action.payload.id) : [action.payload, ...state.favorites] }
+
+
 
         case REGISTER_FAILURE:
         case LOGIN_FAILURE:
@@ -39,8 +41,8 @@ export const authReducer = (state = initialState, action) => {
             return { ...state, isLoading: false, error: action.payload, success: null }
 
 
-            case LOGOUT:
-                return{initialState}
+        case LOGOUT:
+            return { initialState }
 
         default:
             return state;

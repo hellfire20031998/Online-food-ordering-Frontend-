@@ -2,37 +2,60 @@ import { Card, Chip, IconButton } from '@mui/material'
 import React from 'react'
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
-const RestaurantCart = () => {
-  return (
-    <Card className='w-[18rem]' >
-        <div className={`${true ? 'cursor-pointer' :"cursor-not-allowed"} relative`}>
-            <img className='w-full h-[10rem] rounder-t-md object-cover'
-             src='https://images.pexels.com/photos/67468/pexels-photo-67468.jpeg?auto=compress&cs=tinysrgb&w=600' alt='' />
+import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { addToFavorite } from '../State/Authentication/Action';
+import { isPresentInFavorites } from '../config/logic';
+const RestaurantCart = ({ item }) => {
 
-            <Chip
-            size='small'
-            className='absolute top-2 left-2'
-            color={true ? "success" :"error"}
-            label={true ? "Open": "Closed"} 
-            />
-        </div>
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const jwt = localStorage.getItem("jwt")
+    const  auth  = useSelector(store => store.auth)
+    // console.log("auth " , auth)
+    const favorites = auth.favorites
+    // console.log("favorites ", favorites)
+    const isFavorite = isPresentInFavorites(favorites, item);
+    // console.log("isFavorite ", isFavorite)
+    const handleAddToFavourite = () => {
+        dispatch(addToFavorite({ restaurantId: item.id, jwt }))
+    }
 
-        <div className='p-4 textPart lg:flex w-full justify-between'>
-            <div className='space-y-1'>
-                <p className='font-semibold text-lg'>Indian FastFood</p>
-                <p className='text-gray-500 text-sm'>
-                    craving it all? Dive into our global fla..
-                </p>
+    const handeNavigateTORestaurant=()=>{
+        if(item.open){
+            navigate(`/restaurant/${item.address.city}/${item.name}/${item.id}`)
+        }
+      }
+    return (
+        <Card  className='w-[18rem]' >
+            <div className={`${true ? 'cursor-pointer' : "cursor-not-allowed"} relative`}>
+                <img className='w-full h-[10rem] rounder-t-md object-cover'
+                    src={item.images[2]} alt='' />
+
+                <Chip
+                    size='small'
+                    className='absolute top-2 left-2'
+                    color={item.open ? "success" : "error"}
+                    label={item.open ? "Open" : "Closed"}
+                />
             </div>
-        </div>
 
-        <div>
-            <IconButton>
-                {true? <FavoriteIcon/> :<FavoriteBorderIcon/>}
-            </IconButton>
-        </div>
-    </Card>
-  )
+            <div className='p-4 textPart lg:flex w-full justify-between'>
+                <div className='space-y-1'>
+                    <p onClick={handeNavigateTORestaurant} className='font-semibold text-lg cursor-pointer'>{item.name}</p>
+                    <p className='text-gray-500 text-sm'>
+                        {item.description}
+                    </p>
+                </div>
+            </div>
+
+            <div>
+                <IconButton onClick={handleAddToFavourite}>
+                    {isFavorite ? <FavoriteIcon /> : <FavoriteBorderIcon />}
+                </IconButton>
+            </div>
+        </Card>
+    )
 }
 
 export default RestaurantCart

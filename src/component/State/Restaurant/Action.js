@@ -39,13 +39,17 @@ export const getRestaurantById = (reqData) => {
 }
 export const getRestaurantByUserId = (jwt) => {
     return async (dispatch) => {
+        
         dispatch({ type: GET_RESTAURANT_BY_USER_ID_REQUEST });
         try {
-            const { data } = await api.get(`api/restaurants/user`, {
+            
+            const { data } = await api.get(`api/admin/restaurants/user`, {
                 headers: {
                     Authorization: `Bearer ${jwt}`,
                 },
             });
+
+            console.log("getRestaurantByUserId ",data)
             dispatch({ type: GET_RESTAURANT_BY_USER_ID_SUCCESS, payload: data })
         } catch (error) {
             console.log("error ", error)
@@ -55,14 +59,17 @@ export const getRestaurantByUserId = (jwt) => {
     }
 }
 export const createRestaurant = (reqData) => {
+    console.log("create restaurant reqData ", reqData)
     return async (dispatch) => {
         dispatch({ type: CREATE_RESTAURANT_REQUEST });
         try {
-            const { data } = await api.post(`api/admin/restaurants`, reqData.data, {
+            
+            const { data } = await api.post(`/api/admin/restaurants`, reqData.data, {
                 headers: {
                     Authorization: `Bearer ${reqData.token}`,
                 },
             });
+            console.log("created restaurant ", data)
             dispatch({ type: CREATE_RESTAURANT_SUCCESS, payload: data })
         } catch (error) {
             console.log("error ", error)
@@ -109,10 +116,12 @@ export const deleteRestaurant = ({ restaurantId, jwt }) => {
 }
 
 export const updateRestaurantStatus = ({ restaurantId, jwt }) => {
+
+    console.log("Update status req" , restaurantId)
     return async (dispatch) => {
         dispatch({ type: UPDATE_RESTAURANT_STATUS_REQUEST });
         try {
-            const res = await api.put(`api/admin/restaurant/${restaurantId}/status`, {}, {
+            const res = await api.put(`api/admin/restaurants/${restaurantId}/status`, {}, {
                 headers: {
                     Authorization: `Bearer ${jwt}`,
                 },

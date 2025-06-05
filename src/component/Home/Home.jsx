@@ -4,6 +4,8 @@ import MultiItemCarousel from "./MultiItemCarousel";
 import RestaurantCart from "../Restaurant/RestaurantCart";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllRestaurantsAction } from "../State/Restaurant/Action";
+import { useNavigate } from "react-router-dom";
+import { findCart } from "../State/Cart/Action";
 
 const restaurant = [1, 1, 1, 1, 1, 1];
 
@@ -11,11 +13,17 @@ const Home = () => {
   const dispatch = useDispatch();
   const jwt =localStorage.getItem("jwt")
   const {restaurants} = useSelector(store=>store.restaurant)
+  const navigate = useNavigate();
 
-  console.log("restaurants ", restaurants);
+  // console.log("restaurants ", restaurants);
+
+  
 
   useEffect(()=>{
-    dispatch(getAllRestaurantsAction(jwt))
+    if(jwt){
+      dispatch(getAllRestaurantsAction(jwt))
+    }
+   
   },[])
   return (
     <div className="pb-10">

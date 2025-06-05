@@ -21,6 +21,7 @@ export const createMenuItem = ({ menu, jwt }) => {
     }
 }
 export const getMenuItemsByRestaurantId = (reqData) => {
+    console.log("getMenuItemsByRestaurantId ",reqData)
     return async (dispatch) => {
         dispatch({ type: GET_MENU_ITEMS_BY_RESTAURANT_ID_REQUEST });
         try {
@@ -73,6 +74,7 @@ export const searchMenuItem = ({ keyword, jwt }) => {
 // }
 
 export const updateMenuItemAvailability = ({ foodId, jwt }) => {
+    console.log("updata availability req ", foodId)
     return async (dispatch) => {
         dispatch({ type: UPDATE_MENU_ITEMS_AVAILABILITY_REQUEST });
         try {

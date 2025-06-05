@@ -42,7 +42,7 @@ const menuItemReducer = (state = initialState, action) => {
                 ...state,
                 loading: false,
                 menuItems: state.menuItems.map((item) =>
-                    item.id === action.payload.id ? { ...item, available: action.payload.available } : item
+                    item.id === action.payload.id ? action.payload : item
                 ),
                 message: "Menu item availability updated!"
             };

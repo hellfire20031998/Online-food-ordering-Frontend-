@@ -22,13 +22,13 @@ const menu = [
 ];
 
 export const ProfileNavigation = ({ open, handleClose }) => {
-  const isSmallScreen = useMediaQuery("(max-width:1024px)");
+  const isSmallScreen = useMediaQuery("(max-width:620px)");
 
   const navigate=useNavigate();
   const dispatch=useDispatch();
   const handleNavigate=(item)=>{
     if(item.title==="Logout"){
-      dispatch(logout())
+      dispatch(logout(null))
       navigate('/')
     }else
     navigate(`/my-profile/${item.title.toLowerCase()}`)

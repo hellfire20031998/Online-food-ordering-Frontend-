@@ -1,3 +1,4 @@
+
 import { api } from "../../config/api";
 import { GET_RESTAURANT_ORDER_FAILURE, GET_RESTAURANT_ORDER_REQUEST, GET_RESTAURANT_ORDER_SUCCESS, UPDATE_ORDER_STATUS_FAILURE, UPDATE_ORDER_STATUS_REQUEST, UPDATE_ORDER_STATUS_SUCCESS } from "./ActionType"
 
@@ -5,11 +6,12 @@ import { GET_RESTAURANT_ORDER_FAILURE, GET_RESTAURANT_ORDER_REQUEST, GET_RESTAUR
 
 
 export const updateOrderStatus=({orderId,orderStatus,jwt})=>{
+    console.log("updateOrderStatus ",orderId,orderStatus,)
     return async(dispatch)=>{
         try{
             dispatch({type:UPDATE_ORDER_STATUS_REQUEST});
 
-         const response = await api.put(`api/admin/orders/${orderId}/${orderStatus}`,{},{
+         const response = await api.put(`api/admin/order/${orderId}/${orderStatus}`,{},{
             headers:{
                 Authorization:`Bearer ${jwt}`,
             }
@@ -30,6 +32,7 @@ export const updateOrderStatus=({orderId,orderStatus,jwt})=>{
 }
 
 export const fetchRestaurantsOrder =({restaurantId,orderStatus,jwt})=>{
+
     return async (dispatch)=>{
         try{
             dispatch({type:GET_RESTAURANT_ORDER_REQUEST});

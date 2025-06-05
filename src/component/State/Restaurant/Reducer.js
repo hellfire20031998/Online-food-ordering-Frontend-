@@ -34,18 +34,21 @@ const restaurantReducer = (state = initialState, action) => {
         case actionTypes.GET_RESTAURANT_BY_ID_SUCCESS:
             return { ...state, loading: false, restaurant: action.payload };
 
-        case actionTypes.GET_RESTAURANT_BY_USER_ID_SUCCESS:
-            return { ...state, loading: false, usersRestaurant: action.payload };
+        
 
         case actionTypes.CREATE_RESTAURANT_SUCCESS:
-            return { ...state, loading: false, restaurants: [...state.restaurants, action.payload] };
+            return { ...state, loading: false, usersRestaurant:  action.payload };
 
         case actionTypes.UPDATE_RESTAURANT_SUCCESS:
         case actionTypes.UPDATE_RESTAURANT_STATUS_SUCCESS:
-            return { ...state, loading: false, restaurant: action.payload };
+        case actionTypes.GET_RESTAURANT_BY_USER_ID_SUCCESS:
+            return { ...state, loading: false, usersRestaurant: action.payload };
+           
 
         case actionTypes.DELETE_RESTAURANT_SUCCESS:
-            return { ...state, loading: false, restaurants: state.restaurants.filter(r => r.id !== action.payload) };
+            return { ...state, loading: false, restaurants: state.restaurants.filter(r => r.id !== action.payload),
+                usersRestaurant:state.usersRestaurant.filter((item)=>item.id!==action.payload),
+             };
 
         case actionTypes.GET_ALL_EVENTS_SUCCESS:
             return { ...state, loading: false, events: action.payload };

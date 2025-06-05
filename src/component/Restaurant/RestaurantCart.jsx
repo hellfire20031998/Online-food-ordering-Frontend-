@@ -12,11 +12,13 @@ const RestaurantCart = ({ item }) => {
     const dispatch = useDispatch();
     const jwt = localStorage.getItem("jwt")
     const  auth  = useSelector(store => store.auth)
-    // console.log("auth " , auth)
+   
     const favorites = auth.favorites
-    // console.log("favorites ", favorites)
+
+    // console.log("Restaurant favourites ",item)
+    
     const isFavorite = isPresentInFavorites(favorites, item);
-    // console.log("isFavorite ", isFavorite)
+    
     const handleAddToFavourite = () => {
         dispatch(addToFavorite({ restaurantId: item.id, jwt }))
     }
@@ -30,7 +32,7 @@ const RestaurantCart = ({ item }) => {
         <Card  className='w-[18rem]' >
             <div className={`${true ? 'cursor-pointer' : "cursor-not-allowed"} relative`}>
                 <img className='w-full h-[10rem] rounder-t-md object-cover'
-                    src={item.images[2]} alt='' />
+                    src={item.images[0]} alt='' />
 
                 <Chip
                     size='small'

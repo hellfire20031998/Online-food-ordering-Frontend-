@@ -1,10 +1,11 @@
 
 import { Button, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material'
 import { Field, Form, Formik } from 'formik'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { registerUser } from '../State/Authentication/Action'
+import { api } from '../config/api'
 
 
 const initialValues = {
@@ -17,6 +18,12 @@ const initialValues = {
 const RegisterForm = () => {
     const dispatch= useDispatch();
     const navigate = useNavigate();
+    const[role,setRole] = useState([]);
+
+    useEffect(()=>{
+      const {data} = api.get(`auth/roles`).then(res=>{console.log("role data ", res.data);setRole(res.data)})
+      
+    },[])
     const handleSubmit = (values) => {
         dispatch(registerUser({userData:values,navigate}))
             console.log("form values ",values)
@@ -67,8 +74,11 @@ const RegisterForm = () => {
                                 name="role"
                             // onChange={handleChange}
                             >
-                                <MenuItem value={"ROLE_CUSTOMER"}>Customer</MenuItem>
-                                <MenuItem value={"ROLE_RESTAURANT_OWNER"}>Restaurant Owner</MenuItem>
+                                {/* <MenuItem value={"ROLE_CUSTOMER"}>Customer</MenuItem>
+                                <MenuItem value={"ROLE_RESTAURANT_OWNER"}>Restaurant Owner</MenuItem> */}
+                                {
+                                    role.map((data)=><MenuItem value={data}>{data}</MenuItem>)
+                                }
 
                             </Field>
                         </FormControl>

@@ -1,12 +1,13 @@
 import axios from "axios"
 import { ADD_TO_FAVORITE_FAILURE, ADD_TO_FAVORITE_REQUEST, ADD_TO_FAVORITE_SUCCESS, GET_USER_FAILURE, GET_USER_REQUEST, GET_USER_SUCCESS, LOGIN_FAILURE, LOGIN_REQUEST, LOGIN_SUCCESS, LOGOUT, REGISTER_FAILURE, REGISTER_REQUEST, REGISTER_SUCCESS } from "./ActionTypes"
-import { api, API_URL } from "../../config/api"
+import { api, API_URL, profile } from "../../config/api"
+import { getAllRestaurantsAction } from "../Restaurant/Action"
 
 export const registerUser =(reqData)=>async(dispatch)=>{
 
     dispatch({type:REGISTER_REQUEST})
     try {
-        const {data} = await axios.post(`${API_URL}auth/signup`,reqData.userData)
+        const {data} = await api.post(`auth/signup`,reqData.userData)
 
         if(data.jwt)localStorage.setItem("jwt",data.jwt);
         if(data.role==="ROLE_RESTAURANT_OWNER"){
@@ -16,6 +17,7 @@ export const registerUser =(reqData)=>async(dispatch)=>{
         }
 
         dispatch({type:REGISTER_SUCCESS,payload:data.jwt})
+        dispatch(getAllRestaurantsAction(data.jwt))
         console.log("register success ",data)
        
     } catch (error) {
@@ -28,7 +30,7 @@ export const loginUser =(reqData)=>async(dispatch)=>{
 
     dispatch({type:LOGIN_REQUEST})
     try {
-        const {data} = await axios.post(`${API_URL}/auth/signin`,reqData.userData)
+        const {data} = await api.post(`auth/signin`,reqData.userData)
 
         if(data.jwt)localStorage.setItem("jwt",data.jwt);
         if(data.role==="ROLE_RESTAURANT_OWNER"){
@@ -36,7 +38,7 @@ export const loginUser =(reqData)=>async(dispatch)=>{
         }else{
             reqData.navigate("/")
         }
-
+        dispatch(getAllRestaurantsAction(data.jwt))
         dispatch({type:LOGIN_SUCCESS,payload:data.jwt})
         console.log("login success ",data)
        
@@ -50,7 +52,7 @@ export const getUser =(jwt)=>async(dispatch)=>{
 
     dispatch({type:GET_USER_REQUEST})
     try {
-        const {data} = await api.get(`/api/users/profile`,{
+        const {data} = await api.get(profile,{
             headers:{
                 Authorization:`Bearer ${jwt}`
             }
@@ -66,7 +68,8 @@ export const getUser =(jwt)=>async(dispatch)=>{
 }
 
 export const addToFavorite =({jwt,restaurantId})=>async(dispatch)=>{
-
+    
+    
     dispatch({type:ADD_TO_FAVORITE_REQUEST})
     try {
         const {data} = await api.put(`api/restaurants/${restaurantId}/add-favorites`,{},{
@@ -83,13 +86,13 @@ export const addToFavorite =({jwt,restaurantId})=>async(dispatch)=>{
         dispatch({type:ADD_TO_FAVORITE_FAILURE,payload:error})
     }
 }
-export const logout =()=>async(dispatch)=>{
+export const logout=()=>async(dispatch)=>{
 
-    dispatch({type:GET_USER_REQUEST})
+    // dispatch({type:GET_USER_REQUEST})
     try {
-        
+     
         localStorage.clear();
-        dispatch({type:LOGOUT})
+        dispatch({type:LOGOUT,payload:null})
         console.log("user log out success ")
        
     } catch (error) {

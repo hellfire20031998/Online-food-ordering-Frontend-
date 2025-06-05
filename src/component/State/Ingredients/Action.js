@@ -27,10 +27,10 @@ export const getIngredientsOfRestaurant =({id,jwt})=>{
     };
 }
 
-export const createIngedient= ({data,jwt})=>{
+export const createIngredient= ({data,jwt})=>{
     return async (dispatch)=>{
         try{
-            const response = await api.post(`api/admin/ingredients`,data,{
+            const response = await api.post(`/api/admin/ingredients`,data,{
                 headers:{
                     Authorization:`Bearer ${jwt}`,
                 },

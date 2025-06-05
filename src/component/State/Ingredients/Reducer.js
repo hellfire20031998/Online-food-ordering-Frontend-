@@ -33,7 +33,7 @@ export const ingredientReducer = (state = initialState, action) => {
                 ...state,
                 update: action.payload, // could be confirmation or updated ingredient
                 ingredients: state.ingredients.map(item =>
-                    item.id === action.payload.id ? { ...item, stock: action.payload.stock } : item
+                    item.id === action.payload.id ? action.payload : item
                 ),
             };
 

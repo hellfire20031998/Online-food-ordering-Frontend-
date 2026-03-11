@@ -1,100 +1,129 @@
-
-import { Button, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material'
-import { Field, Form, Formik } from 'formik'
-import React, { useEffect, useState } from 'react'
-import { useDispatch } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
-import { registerUser } from '../State/Authentication/Action'
-import { api } from '../config/api'
-
+import {
+  Button,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+  Typography
+} from "@mui/material";
+import { Field, Form, Formik } from "formik";
+import React, { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { registerUser } from "../State/Authentication/Action";
+import { api } from "../config/api";
+import { useTranslation } from "react-i18next";
 
 const initialValues = {
-    fullName: "",
-    email: "",
-    password: "",
-    role: ""
-}
+  fullName: "",
+  email: "",
+  password: "",
+  role: ""
+};
 
 const RegisterForm = () => {
-    const dispatch= useDispatch();
-    const navigate = useNavigate();
-    const[role,setRole] = useState([]);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const [role, setRole] = useState([]);
+  const { t,i18n } = useTranslation();
+  // useEffect(() => {
+  //   const savedLang = localStorage.getItem("lang");
+  //   if (savedLang && i18n.language !== savedLang) {
+  //     i18n.changeLanguage(savedLang);
+  //   }
+  // }, [i18n]);
 
-    useEffect(()=>{
-      const {data} = api.get(`auth/roles`).then(res=>{console.log("role data ", res.data);setRole(res.data)})
-      
-    },[])
-    const handleSubmit = (values) => {
-        dispatch(registerUser({userData:values,navigate}))
-            console.log("form values ",values)
-    }
-    
-    return (
-        <div>
-            <div>
-                <Typography variant='h5' className='text-center'>
-                    Register
-                </Typography>
+  useEffect(() => {
+    api.get("auth/roles")
+      .then((res) => {
+        console.log("role data ", res.data);
+        setRole(res.data);
+      })
+      .catch((err) => console.log("Error fetching roles", err));
+  }, []);
 
-                <Formik onSubmit={handleSubmit} initialValues={initialValues}>
-                    <Form>
-                        <Field
-                            as={TextField}
-                            name="fullName"
-                            label="FullName"
-                            fullWidth
-                            variant="outlined"
-                            margin="normal"
-                        />
-                        <Field
-                            as={TextField}
-                            name="email"
-                            label="email"
-                            fullWidth
-                            variant="outlined"
-                            margin="normal"
-                        />
-                        <Field
-                            as={TextField}
-                            name="password"
-                            label="password"
-                            fullWidth
-                            variant="outlined"
-                            margin="normal"
-                            type="password"
-                        />
-                        <FormControl fullWidth margin='normal'>
-                            <InputLabel id="role-simple-select-label">Role</InputLabel>
-                            <Field
-                                as={Select}
-                                labelId="role-simple-select-label"
-                                id="role-simple-select"
-                                // value={age}
-                                label="Role"
-                                name="role"
-                            // onChange={handleChange}
-                            >
-                                {/* <MenuItem value={"ROLE_CUSTOMER"}>Customer</MenuItem>
-                                <MenuItem value={"ROLE_RESTAURANT_OWNER"}>Restaurant Owner</MenuItem> */}
-                                {
-                                    role.map((data)=><MenuItem value={data}>{data}</MenuItem>)
-                                }
+  const handleSubmit = (values) => {
+    dispatch(registerUser({ userData: values, navigate }));
+    console.log("form values ", values);
+  };
 
-                            </Field>
-                        </FormControl>
+  const changeLanguage = (lng) => {
+    i18n.changeLanguage(lng);
+  };
 
+  return (
+    <div>
+      <div>
+        <Typography variant="h5" className="text-center">
+          {t("register")}
+        </Typography>
 
-                        <Button sx={{ mt: 2, padding: "1rem" }} fullWidth type='submit' variant='contained'>Register</Button>
-                    </Form>
-                </Formik>
+        {/* Language Switcher */}
+        {/* <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 10 }}>
+          <Button onClick={() => changeLanguage("en")}>EN</Button>
+          <Button onClick={() => changeLanguage("hi")}>हिंदी</Button>
+        </div> */}
 
-                <Typography variant='body2' align='center' sx={{ mt: 3 }}> if have an account already
-                    <Button size='small' onClick={() => navigate("/account/login")}
-                    >Login</Button>
-                </Typography>
-            </div>
-        </div>
-    )
-}
+        <Formik onSubmit={handleSubmit} initialValues={initialValues}>
+          <Form>
+            <Field
+              as={TextField}
+              name="fullName"
+              label={t("fullName")}
+              fullWidth
+              variant="outlined"
+              margin="normal"
+            />
+            <Field
+              as={TextField}
+              name="email"
+              label={t("email")}
+              fullWidth
+              variant="outlined"
+              margin="normal"
+            />
+            <Field
+              as={TextField}
+              name="password"
+              label={t("password")}
+              fullWidth
+              variant="outlined"
+              margin="normal"
+              type="password"
+            />
+            <FormControl fullWidth margin="normal">
+              <InputLabel id="role-simple-select-label">{t("role")}</InputLabel>
+              <Field
+                as={Select}
+                labelId="role-simple-select-label"
+                id="role-simple-select"
+                label={t("role")}
+                name="role"
+              >
+                {role.map((data) => (
+                  <MenuItem key={data} value={data}>
+                    {data}
+                  </MenuItem>
+                ))}
+              </Field>
+            </FormControl>
 
-export default RegisterForm
+            <Button sx={{ mt: 2, padding: "1rem" }} fullWidth type="submit" variant="contained">
+              {t("register")}
+            </Button>
+          </Form>
+        </Formik>
+
+        <Typography variant="body2" align="center" sx={{ mt: 3 }}>
+          {t("already_have_account")}
+          <Button size="small" onClick={() => navigate("/account/login")}>
+            {t("login")}
+          </Button>
+        </Typography>
+      </div>
+    </div>
+  );
+};
+
+export default RegisterForm;

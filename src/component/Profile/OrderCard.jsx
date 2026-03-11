@@ -38,7 +38,7 @@ const OrderCard = ({ item, order, onCancel, onChangePaymentMethod }) => {
           </Button>
         )}
 
-        {isCancelable && (
+         {isCancelable && (
           <Button color="error" variant="contained" onClick={handleCancel}>
             Cancel Order
           </Button>

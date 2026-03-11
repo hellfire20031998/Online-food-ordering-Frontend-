@@ -1,14 +1,7 @@
-import logo from './logo.svg';
 import './App.css';
-import NavBar from './component/NavBar/NavBar';
 import { ThemeProvider } from '@emotion/react';
 import { darkTheme } from './Theme/DarkTheme';
 import { CssBaseline } from '@mui/material';
-import Home from './component/Home/Home';
-import RestaurantDetails from './component/Restaurant/RestaurantDetails';
-import Cart from './component/Cart/Cart';
-import Profile from './component/Profile/Profile';
-import CustomerRoute from './Routers/CustomerRoute';
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getUser } from './component/State/Authentication/Action';
@@ -18,25 +11,24 @@ import { getRestaurantByUserId } from './component/State/Restaurant/Action';
 
 function App() {
   const dispatch = useDispatch();
-  const jwt = localStorage.getItem("jwt")
-  const { auth } = useSelector(store => store)
+  const { auth } = useSelector(store => store);
+  const token = auth.jwt || localStorage.getItem("jwt");
 
   useEffect(() => {
-   
-    dispatch(getUser(auth.jwt || jwt))
-    dispatch(findCart(jwt))
-    
-  }, [auth.jwt])
+    if (!token) return;
+    dispatch(getUser(token));
+    dispatch(findCart(token));
+  }, [dispatch, token]);
 
-  useEffect(()=>{
-    dispatch(getRestaurantByUserId(auth.jwt || jwt));
-    
-  },[auth.user])
+  useEffect(() => {
+    if (!token || !auth.user) return;
+    dispatch(getRestaurantByUserId(token));
+  }, [dispatch, token, auth.user]);
   // console.log("auth ", auth)
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
-      <Routers/>
+      <Routers />
     </ThemeProvider>
   );
 }

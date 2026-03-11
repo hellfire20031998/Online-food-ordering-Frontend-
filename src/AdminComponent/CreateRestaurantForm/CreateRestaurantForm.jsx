@@ -32,6 +32,7 @@ export default function CreateRestaurantForm() {
       const data = {
         name: values.name,
         description: values.description,
+        
         cuisineType: values.cuisineType,
         address: {
           streetAddress: values.streetAddress,

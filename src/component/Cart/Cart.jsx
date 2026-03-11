@@ -124,7 +124,8 @@ const Cart = () => {
     
     const placeOrder = (id) => {
         
-        if (!selectedAddress || !paymentMethod) return;
+        if (!selectedAddress || !paymentMethod) 
+            return;
         if (!cart.cartItems || cart.cartItems.length === 0) {
             alert("Your cart is empty. Please add items before placing an order.");
             return;

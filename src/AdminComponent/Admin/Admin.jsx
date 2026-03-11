@@ -15,11 +15,14 @@ import { getRestaurantById, getRestaurantsCategory } from '../../component/State
 import { getMenuItemsByRestaurantId } from '../../component/State/Menu/Action'
 import { getUserOrders } from '../../component/State/Order/Action'
 import { fetchRestaurantsOrder } from '../../component/State/Restaurant Order/Action'
+import Cart from '../../component/Cart/Cart'
+import AssignRolePage from '../AssignRole/AssignRolePage'
 
 export default function Admin() {
   const dispatch= useDispatch();
   const jwt = localStorage.getItem('jwt')
   const {restaurant} = useSelector(store=>store)
+  const id =restaurant.usersRestaurant.id
 
     const handleClose=()=>{
         
@@ -54,6 +57,8 @@ export default function Admin() {
                     <Route path='/ingredients'  element={<Ingredients/>}/>
                     <Route path='/details'  element={<RestaurantDetails/>}/>
                     <Route path='/add-menu'  element={<CreateMenuForm/>}/>
+                    {/* <Route path='/cart' element={<Cart/>}/> */}
+                    {/* <Route path='/addUser' element={<AssignRolePage restaurantId={id}/>}/> */}
                 </Routes>
             </div>
       </div>

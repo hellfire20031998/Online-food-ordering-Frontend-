@@ -10,9 +10,13 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { logout } from '../../component/State/Authentication/Action';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt';
 
 const menu = [
   { title: "Dashboard", icon: <Dashboard />, path: "/" },
+  // { title: "Restaurant Card", icon: <ShoppingCartIcon />, path: "/cart" },
+  // { title: "Add User", icon: <PersonAddAltIcon />, path: "/addUser" },
   { title: "Orders", icon: <ShoppingBag />, path: "/orders" },
   { title: "Menu", icon: <ShopTwoIcon />, path: "/menu" },
   { title: "Food Category", icon: <CategoryIcon />, path: "/category" },
@@ -20,6 +24,7 @@ const menu = [
   { title: "Events", icon: <EventIcon />, path: "/event" },
   { title: "Details", icon: <AdminPanelSettingsIcon />, path: "/details" },
   { title: "Logout", icon: <LogoutIcon />, path: "/" },
+  
 ];
 
 export default function AdminSideBar({ handleClose }) {

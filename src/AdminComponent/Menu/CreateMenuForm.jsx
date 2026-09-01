@@ -1,4 +1,4 @@
-import { AddPhotoAlternate, Category, Close, Email } from '@mui/icons-material';
+import { AddPhotoAlternate } from '@mui/icons-material';
 import { Box, Button, Chip, CircularProgress, FormControl, Grid, IconButton, InputLabel, MenuItem, OutlinedInput, Select, TextField } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { useFormik } from 'formik'
@@ -6,13 +6,13 @@ import React, { useEffect, useState } from 'react'
 import { uploadImageToCloudinary } from '../util/CreateUploadToCloudinary';
 import { useDispatch, useSelector } from 'react-redux';
 import { createMenuItem } from '../../component/State/Menu/Action';
+import { getIngredientsOfRestaurant } from '../../component/State/Ingredients/Action';
 
 const initialValues = {
     name: "",
     description: "",
     price: "",
     category: "",
-    restaurantId: "",
     vegetarian: true,
     seasonal: false,
     ingredients: [],
@@ -20,35 +20,45 @@ const initialValues = {
 }
 
 export default function CreateMenuForm() {
-    const [uploadImage, setUplaodImage] = useState(false);
+    const [uploadingImage, setUploadingImage] = useState(false);
     const dispatch = useDispatch();
-    const { restaurant, ingredients } = useSelector((store) => store)
-    const jwt = localStorage.getItem('jwt')
+    const restaurantId = useSelector((store) => store.restaurant.usersRestaurant?.id)
+    const categories = useSelector((store) => store.restaurant.categories)
+    const ingredients = useSelector((store) => store.ingredients.ingredients)
+
+    useEffect(() => {
+        if (!restaurantId) return;
+        dispatch(getIngredientsOfRestaurant({ id: restaurantId }));
+    }, [dispatch, restaurantId]);
+
     const formik = useFormik({
         initialValues,
         onSubmit: (values) => {
-            values.restaurantId=restaurant.usersRestaurant.id;
-            dispatch(createMenuItem({menu:values,jwt}))
-            console.log("values restaurant id ------", values)
+            const menu = {
+                ...values,
+                restaurantId,
+            };
+            dispatch(createMenuItem({ menu }))
         }
-
     });
-    
+
     const handleImageChange = async (e) => {
         const file = e.target.files[0]
-        setUplaodImage(true)
-        const image = await uploadImageToCloudinary(file)
-        console.log("image-----", image)
-
-        formik.setFieldValue("images", [...formik.values.images, image])
-        setUplaodImage(false)
+        if (!file) return;
+        setUploadingImage(true)
+        try {
+            const image = await uploadImageToCloudinary(file)
+            formik.setFieldValue("images", [...formik.values.images, image])
+        } finally {
+            setUploadingImage(false)
+        }
     }
     const handleRemoveImage = (index) => {
         const updatedImage = [...formik.values.images]
         updatedImage.splice(index, 1);
         formik.setFieldValue("images", updatedImage)
     }
-   
+
     return (
         <div className='py-10 px-5 lg:flex items-center justify-center min-h-screen'>
             <div className='lg:max-w-4xl'>
@@ -67,16 +77,15 @@ export default function CreateMenuForm() {
                             <label className='relative' htmlFor='fileInput'>
                                 <span className='w-24 h-24 cursor-pointer flex items-center justify-center p-3 border rounded-md border-gray-600'>
                                     <AddPhotoAlternate className='text-white' />
-
                                 </span>
                                 {
-                                    uploadImage && <div className='absolute left-0 right-0 top-0 bottom-0 w-24 h-24 flex justify-center items-center'>
+                                    uploadingImage && <div className='absolute left-0 right-0 top-0 bottom-0 w-24 h-24 flex justify-center items-center'>
                                         <CircularProgress />
                                     </div>
                                 }
                             </label>
                             <div className='flex flex-wrap gap-2'>
-                                {formik.values.images.map((item, index) => <div className='relative' key={index}>
+                                {formik.values.images.map((item, index) => <div className='relative' key={item}>
                                     <img className='w-24 h-24 object-cover' src={item} alt='' />
                                     <IconButton
                                         size='small'
@@ -99,9 +108,7 @@ export default function CreateMenuForm() {
                                 label="Name"
                                 variant='outlined'
                                 onChange={formik.handleChange}
-                                value={formik.values.name}>
-
-                            </TextField>
+                                value={formik.values.name} />
                         </Grid>
                         <Grid item xs={12}>
                             <TextField fullWidth
@@ -110,43 +117,38 @@ export default function CreateMenuForm() {
                                 label="Description"
                                 variant='outlined'
                                 onChange={formik.handleChange}
-                                value={formik.values.description}>
-
-                            </TextField>
+                                value={formik.values.description} />
                         </Grid>
                         <Grid item xs={12} lg={6}>
                             <TextField fullWidth
                                 id='price'
                                 name='price'
-                                label="Price "
+                                label="Price"
                                 variant='outlined'
                                 onChange={formik.handleChange}
-                                value={formik.values.price}>
-
-                            </TextField>
+                                value={formik.values.price} />
                         </Grid>
                         <Grid item xs={12} lg={6}>
                             <FormControl fullWidth>
-                                <InputLabel id="demo-simple-select-label">Category</InputLabel>
+                                <InputLabel id="category-select-label">Category</InputLabel>
                                 <Select
-                                    labelId="demo-simple-select-label"
-                                    id="demo-simple-select"
+                                    labelId="category-select-label"
+                                    id="category-select"
                                     value={formik.values.category}
                                     label="Category"
                                     onChange={formik.handleChange}
                                     name='category'
                                 >
-                                    {restaurant.categories.map((item)=><MenuItem value={item}>{item.name}</MenuItem>)}
-                                    
+                                    {categories.map((item) => <MenuItem key={item.id} value={item}>{item.name}</MenuItem>)}
                                 </Select>
                             </FormControl>
                         </Grid>
                         <Grid item xs={12}>
                             <FormControl fullWidth>
-                                <InputLabel id="demo-multiple-chip-label">Ingredients</InputLabel>
+                                <InputLabel id="ingredients-select-label">Ingredients</InputLabel>
                                 <Select
-                                    labelId="demo-multiple-chip-label"
-                                    id="demo-multiple-chip"
+                                    labelId="ingredients-select-label"
+                                    id="ingredients-select"
                                     name='ingredients'
                                     multiple
                                     value={formik.values.ingredients}
@@ -159,14 +161,9 @@ export default function CreateMenuForm() {
                                             ))}
                                         </Box>
                                     )}
-                                //   MenuProps={MenuProps}
                                 >
-                                    {ingredients?.ingredients.map((item,index) => (
-                                        <MenuItem
-                                            key={item.id}
-                                            value={item}
-
-                                        >
+                                    {ingredients?.map((item) => (
+                                        <MenuItem key={item.id} value={item}>
                                             {item.name}
                                         </MenuItem>
                                     ))}
@@ -175,10 +172,10 @@ export default function CreateMenuForm() {
                         </Grid>
                         <Grid item xs={12} lg={6}>
                             <FormControl fullWidth>
-                                <InputLabel id="demo-simple-select-label">Vegetarian</InputLabel>
+                                <InputLabel id="vegetarian-select-label">Vegetarian</InputLabel>
                                 <Select
-                                    labelId="demo-simple-select-label"
-                                    id="demo-simple-select"
+                                    labelId="vegetarian-select-label"
+                                    id="vegetarian-select"
                                     value={formik.values.vegetarian}
                                     label="Vegetarian"
                                     onChange={formik.handleChange}
@@ -191,10 +188,10 @@ export default function CreateMenuForm() {
                         </Grid>
                         <Grid item xs={12} lg={6}>
                             <FormControl fullWidth>
-                                <InputLabel id="demo-simple-select-label">Seasonal</InputLabel>
+                                <InputLabel id="seasonal-select-label">Seasonal</InputLabel>
                                 <Select
-                                    labelId="demo-simple-select-label"
-                                    id="demo-simple-select"
+                                    labelId="seasonal-select-label"
+                                    id="seasonal-select"
                                     value={formik.values.seasonal}
                                     label="Seasonal"
                                     onChange={formik.handleChange}
@@ -202,17 +199,14 @@ export default function CreateMenuForm() {
                                 >
                                     <MenuItem value={true}>Yes</MenuItem>
                                     <MenuItem value={false}>No</MenuItem>
-
                                 </Select>
                             </FormControl>
                         </Grid>
-
                     </Grid>
 
                     <Button className='mt-4' variant='contained' color='primary' type='submit'>Create Menu</Button>
                 </form>
             </div>
-
         </div>
     )
 }

@@ -1,9 +1,11 @@
 import {
+    Alert,
     Box,
     Button,
     Card,
     Divider,
     Modal,
+    Snackbar,
     TextField,
 } from "@mui/material";
 import {
@@ -11,75 +13,87 @@ import {
     InputLabel,
     MenuItem,
     Select,
-  } from "@mui/material";
-import React, { useEffect, useState } from "react";
+} from "@mui/material";
+import React, { useCallback, useEffect, useState } from "react";
 import CartItem from "./CartItem";
 import AddressCart from "./AddressCart";
 import AddLocationAltIcon from "@mui/icons-material/AddLocationAlt";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { createOrder } from "../State/Order/Action";
-import { api } from "../config/api";
+import { api, getErrorMessage } from "../config/api";
+
+const DELIVERY_FEE = 21;
+const GST_AND_CHARGES = 50;
+
+const modalStyle = {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    width: 400,
+    bgcolor: "background.paper",
+    outline: "none",
+    boxShadow: 24,
+    p: 4,
+};
+
+const initialValues = {
+    fullName: "",
+    mobile: "",
+    streetAddress: "",
+    landmark: "",
+    city: "",
+    state: "",
+    pincode: "",
+    country: "India",
+};
+
+const validationSchema = Yup.object({
+    fullName: Yup.string().required("Required"),
+    mobile: Yup.string().required("Required"),
+    streetAddress: Yup.string().required("Required"),
+    city: Yup.string().required("Required"),
+    state: Yup.string().required("Required"),
+    pincode: Yup.string().required("Required"),
+});
 
 const Cart = () => {
     const dispatch = useDispatch();
-    const { cart, auth } = useSelector((store) => store);
+    const navigate = useNavigate();
+    const cart = useSelector((store) => store.cart.cart);
+    const cartItems = useSelector((store) => store.cart.cartItems);
 
     const [open, setOpen] = useState(false);
     const [selectedAddress, setSelectedAddress] = useState(null);
-    const [address, setAddress] = useState([]);
+    const [addresses, setAddresses] = useState([]);
     const [paymentMethod, setPaymentMethod] = useState("");
     const [paymentMethods, setPaymentMethods] = useState([]);
+    const [placingOrder, setPlacingOrder] = useState(false);
+    const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "info" });
 
-    const jwt = localStorage.getItem("jwt");
+    const showSnackbar = (message, severity = "info") =>
+        setSnackbar({ open: true, message, severity });
 
-    const style = {
-        position: "absolute",
-        top: "50%",
-        left: "50%",
-        transform: "translate(-50%, -50%)",
-        width: 400,
-        bgcolor: "background.paper",
-        outline: "none",
-        boxShadow: 24,
-        p: 4,
-    };
+    const closeSnackbar = () => setSnackbar((prev) => ({ ...prev, open: false }));
 
-    const initialValues = {
-        fullName: "",
-        mobile: "",
-        streetAddress: "",
-        landmark: "",
-        city: "",
-        state: "",
-        pincode: "",
-        country: "India",
-    };
+    // The whole cart belongs to one restaurant; take it from the first item's food.
+    const restaurantId = cartItems?.[0]?.food?.restaurant?.id;
 
-    const validationSchema = Yup.object({
-        fullName: Yup.string().required("Required"),
-        mobile: Yup.string().required("Required"),
-        streetAddress: Yup.string().required("Required"),
-        city: Yup.string().required("Required"),
-        state: Yup.string().required("Required"),
-        pincode: Yup.string().required("Required"),
-    });
+    const itemTotal = Number(cart?.total) || 0;
+    const totalPay = itemTotal + DELIVERY_FEE + GST_AND_CHARGES;
 
     const handleSubmit = async (values, { setSubmitting, resetForm }) => {
         try {
-            const response = await api.post("api/users/add_address", values, {
-                headers: {
-                    Authorization: `Bearer ${jwt}`,
-                },
-            });
-            alert("Address added successfully!");
-            setAddress((prev) => [...prev, response.data]);
+            const response = await api.post("api/users/add_address", values);
+            showSnackbar("Address added successfully", "success");
+            setAddresses((prev) => [...prev, response.data]);
             setOpen(false);
             resetForm();
         } catch (error) {
-            console.error("Error adding address:", error);
-            alert("Failed to add address");
+            showSnackbar(getErrorMessage(error, "Failed to add address"), "error");
         } finally {
             setSubmitting(false);
         }
@@ -87,78 +101,75 @@ const Cart = () => {
 
     const handleDeleteAddress = async (addressId) => {
         try {
-            await api.delete(`/api/users/deleteAddress/${addressId}`, {
-                headers: { Authorization: `Bearer ${jwt}` },
-            });
-            alert("Address deleted successfully");
-            fetchAddress();
-        } catch (err) {
-            console.error("Failed to delete address", err);
-            alert("Error deleting address");
+            await api.delete(`api/users/deleteAddress/${addressId}`);
+            showSnackbar("Address deleted", "success");
+            if (selectedAddress?.id === addressId) setSelectedAddress(null);
+            fetchAddresses();
+        } catch (error) {
+            showSnackbar(getErrorMessage(error, "Error deleting address"), "error");
         }
     };
 
-    const fetchAddress = () => {
-        api
-            .get(`api/users/getAddresses`, {
-                headers: { Authorization: `Bearer ${jwt}` },
-            })
-            .then((res) => setAddress(res.data))
-            .catch((err) => {
-                console.error(err);
-                if (err.response?.status === 403) {
-                    alert("You are not authorized to access this resource.");
-                }
+    const fetchAddresses = useCallback(() => {
+        api.get(`api/users/getAddresses`)
+            .then((res) => setAddresses(res.data))
+            .catch((error) => {
+                showSnackbar(getErrorMessage(error, "Could not load addresses"), "error");
             });
-    };
-
-    const fetchPayments = () => {
-        api
-            .get(`api/payment-methods`, {
-                headers: { Authorization: `Bearer ${jwt}` },
-            })
-            .then((res) => setPaymentMethods(res.data))
-            .catch((err) => console.error("Payment method fetch error", err));
-    };
-    // console.log("cart cartitems ",cart.cartItems)
-    
-    const placeOrder = (id) => {
-        
-        if (!selectedAddress || !paymentMethod) 
-            return;
-        if (!cart.cartItems || cart.cartItems.length === 0) {
-            alert("Your cart is empty. Please add items before placing an order.");
-            return;
-          }
-          console.log("rest id ----------",id)
-          
-        const data = {
-            jwt,
-            order: {
-                
-                restaurantId:id,
-                deliveryAddress: selectedAddress,
-                paymentMethod: paymentMethod,
-            },
-        };
-        dispatch(createOrder(data));
-        alert("Your order is successfully palced" );
-    };
-
-    useEffect(() => {
-        fetchAddress();
-        fetchPayments();
     }, []);
 
-    // console.log("cart from cart ", cart)
+    const fetchPayments = useCallback(() => {
+        api.get(`api/payment-methods`)
+            .then((res) => setPaymentMethods(res.data))
+            .catch((error) => {
+                showSnackbar(getErrorMessage(error, "Could not load payment methods"), "error");
+            });
+    }, []);
+
+    useEffect(() => {
+        fetchAddresses();
+        fetchPayments();
+    }, [fetchAddresses, fetchPayments]);
+
+    const placeOrder = async () => {
+        if (!cartItems || cartItems.length === 0) {
+            showSnackbar("Your cart is empty. Please add items before placing an order.", "warning");
+            return;
+        }
+        if (!selectedAddress || !paymentMethod) {
+            showSnackbar("Please select a delivery address and payment method.", "warning");
+            return;
+        }
+        if (!restaurantId) {
+            showSnackbar("Could not determine the restaurant for this cart. Please refresh and try again.", "error");
+            return;
+        }
+
+        setPlacingOrder(true);
+        const result = await dispatch(
+            createOrder({
+                restaurantId,
+                deliveryAddress: selectedAddress,
+                paymentMethod,
+            })
+        );
+        setPlacingOrder(false);
+
+        if (result?.success) {
+            showSnackbar("Your order was placed successfully", "success");
+            navigate("/my-profile/orders");
+        } else {
+            showSnackbar(result?.message || "Failed to place order", "error");
+        }
+    };
 
     return (
         <>
             <main className="lg:flex justify-between">
                 {/* LEFT PANEL */}
                 <section className="lg:w-[30%] space-y-6 lg:min-h-screen pt-10">
-                    {cart.cartItems.map((item, index) => (
-                        <CartItem item={item} key={index} />
+                    {cartItems.map((item) => (
+                        <CartItem item={item} key={item.id} />
                     ))}
                     <Divider />
                     <div className="py-5 px-5">
@@ -173,8 +184,8 @@ const Cart = () => {
                                 onChange={(e) => setPaymentMethod(e.target.value)}
                                 label="Payment Method"
                             >
-                                {paymentMethods.map((method, idx) => (
-                                    <MenuItem key={idx} value={method}>
+                                {paymentMethods.map((method) => (
+                                    <MenuItem key={method} value={method}>
                                         {method}
                                     </MenuItem>
                                 ))}
@@ -187,31 +198,31 @@ const Cart = () => {
                         <div className="space-y-3">
                             <div className="flex justify-between text-gray-400">
                                 <p>Item Total</p>
-                                <p>{cart.cart?.total}</p>
+                                <p>{itemTotal.toFixed(2)}</p>
                             </div>
                             <div className="flex justify-between text-gray-400">
                                 <p>Delivery Fee</p>
-                                <p>$21</p>
+                                <p>{DELIVERY_FEE.toFixed(2)}</p>
                             </div>
                             <div className="flex justify-between text-gray-400">
                                 <p>GST and Restaurant Charges</p>
-                                <p>$50</p>
+                                <p>{GST_AND_CHARGES.toFixed(2)}</p>
                             </div>
                             <Divider />
                         </div>
                         <div className="flex justify-between text-gray-400">
                             <p>Total Pay</p>
-                            <p>{cart.cart?.total + 50 + 21}</p>
+                            <p>{totalPay.toFixed(2)}</p>
                         </div>
                     </div>
                     <div className="py-5 flex justify-center">
                         <Button
                             variant="contained"
                             color="primary"
-                            disabled={!selectedAddress || !paymentMethod}
-                            onClick={()=>placeOrder(cart.cartItems[0].food.id)}
+                            disabled={!selectedAddress || !paymentMethod || placingOrder || cartItems.length === 0}
+                            onClick={placeOrder}
                         >
-                            Place Order
+                            {placingOrder ? "Placing Order..." : "Place Order"}
                         </Button>
                     </div>
                 </section>
@@ -225,9 +236,9 @@ const Cart = () => {
                             Choose Delivery Address
                         </h1>
                         <div className="flex gap-5 flex-wrap justify-center">
-                            {address.map((item, index) => (
+                            {addresses.map((item) => (
                                 <AddressCart
-                                    key={index}
+                                    key={item.id}
                                     handleSelectAddress={setSelectedAddress}
                                     item={item}
                                     handleDeleteAddress={handleDeleteAddress}
@@ -254,7 +265,7 @@ const Cart = () => {
 
             {/* MODAL FORM */}
             <Modal open={open} onClose={() => setOpen(false)}>
-                <Box sx={style}>
+                <Box sx={modalStyle}>
                     <Formik
                         initialValues={initialValues}
                         validationSchema={validationSchema}
@@ -295,6 +306,17 @@ const Cart = () => {
                     </Formik>
                 </Box>
             </Modal>
+
+            <Snackbar
+                open={snackbar.open}
+                autoHideDuration={4000}
+                onClose={closeSnackbar}
+                anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+            >
+                <Alert onClose={closeSnackbar} severity={snackbar.severity} sx={{ width: "100%" }}>
+                    {snackbar.message}
+                </Alert>
+            </Snackbar>
         </>
     );
 };

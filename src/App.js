@@ -11,20 +11,22 @@ import { getRestaurantByUserId } from './component/State/Restaurant/Action';
 
 function App() {
   const dispatch = useDispatch();
-  const { auth } = useSelector(store => store);
-  const token = auth.jwt || localStorage.getItem("jwt");
+  const jwt = useSelector(store => store.auth.jwt);
+  const user = useSelector(store => store.auth.user);
+  const token = jwt || localStorage.getItem("jwt");
 
   useEffect(() => {
     if (!token) return;
-    dispatch(getUser(token));
-    dispatch(findCart(token));
+    dispatch(getUser());
+    dispatch(findCart());
   }, [dispatch, token]);
 
   useEffect(() => {
-    if (!token || !auth.user) return;
-    dispatch(getRestaurantByUserId(token));
-  }, [dispatch, token, auth.user]);
-  // console.log("auth ", auth)
+    // Only restaurant owners/admins have a restaurant to load.
+    if (!token || user?.role !== "ADMIN") return;
+    dispatch(getRestaurantByUserId());
+  }, [dispatch, token, user]);
+
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />

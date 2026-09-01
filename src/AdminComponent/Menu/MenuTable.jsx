@@ -4,8 +4,6 @@ import {
   Card,
   CardHeader,
   IconButton,
-  Menu,
-  MenuItem,
   Paper,
   Table,
   TableBody,
@@ -15,8 +13,8 @@ import {
   TableRow,
   Chip,
 } from "@mui/material";
-import React, { useEffect, useState } from "react";
-import { Create, Delete, MoreVert } from "@mui/icons-material";
+import React, { useEffect } from "react";
+import { Create, Delete } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -28,53 +26,30 @@ import {
 export default function MenuTable() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { restaurant, menu } = useSelector((store) => store);
-  const jwt = localStorage.getItem("jwt");
-
-  const [menuAnchorEl, setMenuAnchorEl] = useState(null);
-  const [selectedItemId, setSelectedItemId] = useState(null);
+  const restaurantId = useSelector((store) => store.restaurant.usersRestaurant?.id);
+  const menuItems = useSelector((store) => store.menu.menuItems);
 
   useEffect(() => {
+    if (!restaurantId) return;
     dispatch(
       getMenuItemsByRestaurantId({
-        jwt,
-        restaurantID: restaurant.usersRestaurant.id,
+        restaurantId,
         vegetarian: false,
-        nonveg: false,
+        nonVegetarian: false,
         seasonal: false,
         foodCategory: "",
       })
     );
-  }, []);
+  }, [dispatch, restaurantId]);
 
   const handleDeleteFood = (foodId) => {
-    dispatch(deleteFoodAction({ foodId, jwt }));
+    dispatch(deleteFoodAction({ foodId }));
   };
 
-  const handleMenuClick = (event, itemId) => {
-    setMenuAnchorEl(event.currentTarget);
-    setSelectedItemId(itemId);
+  const handleToggleAvailability = (foodId) => {
+    // The endpoint toggles availability; the success action stores the updated item.
+    dispatch(updateMenuItemAvailability({ foodId }));
   };
-
-  const handleMenuClose = () => {
-    setMenuAnchorEl(null);
-    setSelectedItemId(null);
-  };
-
-  const handleAvailabilityChange = (newAvailability) => {
-    if (selectedItemId) {
-      dispatch(updateMenuItemAvailability({
-        foodId: selectedItemId,
-        available: newAvailability,
-        jwt,
-      }));
-      setMenuAnchorEl(null); // Close menu
-      setSelectedItemId(null); // Reset
-    }
-  };
-  
-
-  console.log("menu table cart ",selectedItemId)
 
   return (
     <Box>
@@ -101,15 +76,15 @@ export default function MenuTable() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {menu.menuItems.map((item) => (
+              {menuItems.map((item) => (
                 <TableRow key={item.id}>
                   <TableCell>
-                    <Avatar src={item.images[0]} />
+                    <Avatar src={item.images?.[0]} />
                   </TableCell>
                   <TableCell align="right">{item.name}</TableCell>
-                  <TableCell align="right">₹{item.price}</TableCell>
+                  <TableCell align="right">₹{Number(item.price ?? 0).toFixed(2)}</TableCell>
                   <TableCell align="right">
-                    {item.ingredientsItems.map((ingredient) => (
+                    {item.ingredientsItems?.map((ingredient) => (
                       <Chip
                         key={ingredient.id}
                         label={ingredient.name}
@@ -122,7 +97,7 @@ export default function MenuTable() {
                     <Chip
                       label={item.available ? "In Stock" : "Out of Stock"}
                       color={item.available ? "success" : "error"}
-                      onClick={(e) => handleMenuClick(e, item.id)}
+                      onClick={() => handleToggleAvailability(item.id)}
                       sx={{ cursor: "pointer" }}
                     />
                   </TableCell>
@@ -136,16 +111,6 @@ export default function MenuTable() {
             </TableBody>
           </Table>
         </TableContainer>
-
-        {/* Menu for toggling availability */}
-        <Menu
-          anchorEl={menuAnchorEl}
-          open={Boolean(menuAnchorEl)}
-          onClose={handleMenuClose}
-        >
-          <MenuItem onClick={() => handleAvailabilityChange(true)}>In Stock</MenuItem>
-          <MenuItem onClick={() => handleAvailabilityChange(false)}>Out of Stock</MenuItem>
-        </Menu>
       </Card>
     </Box>
   );

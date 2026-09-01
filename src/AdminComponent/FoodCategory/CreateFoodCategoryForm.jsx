@@ -4,32 +4,19 @@ import { useDispatch, useSelector } from 'react-redux';
 import { createCategory } from '../../component/State/Restaurant/Action';
 
 export default function CreateFoodCategoryForm() {
-  const [formData, setFormData] = useState({
-    categoryName: '',
-    restaurantId: ''
-  });
+  const [categoryName, setCategoryName] = useState('');
   const dispatch = useDispatch();
-
-  const {restaurant} = useSelector(store=>store);
+  const restaurantId = useSelector(store => store.restaurant.usersRestaurant?.id);
 
   const handleSubmit = (e) => {
-    e.preventDefault(); // prevent page reload
+    e.preventDefault();
+    if (!restaurantId || !categoryName.trim()) return;
     const data = {
-      name: formData.categoryName,
-      restaurantId: {
-        id: Number(formData.restaurantId) || 1, // fallback to 1 if empty
-      }
+      name: categoryName.trim(),
+      restaurantId: { id: restaurantId },
     };
-    dispatch(createCategory({reqData:data,jwt:localStorage.getItem('jwt')}))
-    console.log("category data form ", data);
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value
-    }));
+    dispatch(createCategory(data));
+    setCategoryName('');
   };
 
   return (
@@ -42,8 +29,8 @@ export default function CreateFoodCategoryForm() {
           name='categoryName'
           label="Category"
           variant='outlined'
-          onChange={handleInputChange}
-          value={formData.categoryName}
+          onChange={(e) => setCategoryName(e.target.value)}
+          value={categoryName}
           className='mb-4'
         />
 

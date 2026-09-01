@@ -1,23 +1,21 @@
 import { Button, Card, CardContent, CardHeader, Grid } from '@mui/material'
 import InstagramIcon from '@mui/icons-material/Instagram';
 import XIcon from '@mui/icons-material/X';
-import LinkedInIcon from '@mui/icons-material/LinkedIn';
-import FacebookIcon from '@mui/icons-material/Facebook';
 import React from 'react'
 import { useDispatch, useSelector } from 'react-redux';
-import { getRestaurantByUserId, updateRestaurantStatus } from '../../component/State/Restaurant/Action';
+import { updateRestaurantStatus } from '../../component/State/Restaurant/Action';
 
 export default function RestaurantDetails() {
-  const{restaurant}=useSelector(store=>store)
+  const usersRestaurant = useSelector(store => store.restaurant.usersRestaurant);
   const dispatch = useDispatch();
-    const handleRestaurantStatus =()=>{
-      dispatch(updateRestaurantStatus({
-        restaurantId:restaurant.usersRestaurant.id,
-        jwt:localStorage.getItem("jwt")
-      }))
-      dispatch(getRestaurantByUserId({jwt:localStorage.getItem('jwt')}))
-    }
-    console.log("Restaurant details " ,restaurant)
+
+  const handleRestaurantStatus = () => {
+    if (!usersRestaurant?.id) return;
+    // The success action already stores the updated restaurant; no refetch needed.
+    dispatch(updateRestaurantStatus({ restaurantId: usersRestaurant.id }))
+  }
+
+  const restaurant = { usersRestaurant };
   return (
     <div className='lg:px-20 px-5 pb-10'>
         <div className='py-5 flex justify-center items-center gap-5'>
@@ -185,21 +183,17 @@ export default function RestaurantDetails() {
                     <p className='w-48'>Social</p>
                     <div className='flex text-gray-400 items-center pb-3 gap-2'>
                       <span className='pr-5 '>-</span>
-                      <a href={restaurant.usersRestaurant?.contactInformation?.instagram}>
-                      <InstagramIcon sx={{fontSize:'3rem'}}/>
-                      </a>
+                      {restaurant.usersRestaurant?.contactInformation?.instagram && (
+                        <a href={restaurant.usersRestaurant.contactInformation.instagram} target='_blank' rel='noreferrer'>
+                          <InstagramIcon sx={{fontSize:'3rem'}}/>
+                        </a>
+                      )}
 
-                      <a href={restaurant.usersRestaurant?.contactInformation?.twitter}>
-                      <XIcon sx={{fontSize:'3rem'}}/>
-                      </a>
-
-                      <a href=''>
-                      <LinkedInIcon sx={{fontSize:'3rem'}}/>
-                      </a>
-
-                      <a href=''>
-                      <FacebookIcon sx={{fontSize:'3rem'}}/>
-                      </a>
+                      {restaurant.usersRestaurant?.contactInformation?.twitter && (
+                        <a href={restaurant.usersRestaurant.contactInformation.twitter} target='_blank' rel='noreferrer'>
+                          <XIcon sx={{fontSize:'3rem'}}/>
+                        </a>
+                      )}
                     </div>
                     
                   </div>

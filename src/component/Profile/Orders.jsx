@@ -2,46 +2,42 @@ import React, { useEffect, useState } from 'react'
 import OrderCard from './OrderCard'
 import { useDispatch, useSelector } from 'react-redux';
 import { getUserOrders } from '../State/Order/Action';
-import { useNavigate } from 'react-router-dom';
-import { api } from '../config/api';
-import { Box, Button, MenuItem, Modal, Select, Typography } from '@mui/material';
+import { api, getErrorMessage } from '../config/api';
+import { Alert, Box, Button, MenuItem, Modal, Select, Snackbar, Typography } from '@mui/material';
 
 const Orders = () => {
-  const navigate = useNavigate();
-  const { auth, order } = useSelector(store => store);
-  const jwt = localStorage.getItem("jwt");
+  const orders = useSelector(store => store.order.orders);
   const dispatch = useDispatch();
 
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [paymentMethods, setPaymentMethods] = useState([]);
   const [newPaymentMethod, setNewPaymentMethod] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
+  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "info" });
+
+  const showSnackbar = (message, severity = "info") =>
+    setSnackbar({ open: true, message, severity });
+
+  const closeSnackbar = () => setSnackbar((prev) => ({ ...prev, open: false }));
 
   useEffect(() => {
-    dispatch(getUserOrders(jwt));
-  }, [auth.jwt]);
+    dispatch(getUserOrders());
+  }, [dispatch]);
 
   useEffect(() => {
-    // Fetch available payment methods
-    api.get("/api/payment-methods", {
-      headers: { Authorization: `Bearer ${jwt}` }
-    }).then(res => {
-      setPaymentMethods(res.data);
-    }).catch(err => {
-      console.error("Failed to fetch payment methods", err);
-    });
+    api.get("api/payment-methods")
+      .then(res => setPaymentMethods(res.data))
+      .catch(() => setPaymentMethods([]));
   }, []);
 
   const handleCancel = async (orderId) => {
     try {
-      await api.delete(`/api/order/${orderId}`, {
-        headers: { Authorization: `Bearer ${jwt}` },
-      });
-      alert("Order cancelled successfully");
-      dispatch(getUserOrders(jwt));
-    } catch (err) {
-      alert("Unauthorized to Cancel Order");
-      console.error(err);
+      // Sets the order status to CANCELLED on the backend.
+      await api.delete(`api/order/${orderId}`);
+      showSnackbar("Order cancelled successfully", "success");
+      dispatch(getUserOrders());
+    } catch (error) {
+      showSnackbar(getErrorMessage(error, "Could not cancel order"), "error");
     }
   };
 
@@ -52,40 +48,29 @@ const Orders = () => {
 
   const handleSubmitChangePayment = async () => {
     try {
-      await api.put(`/api/changeMethod`, {
+      await api.put(`api/changeMethod`, {
         orderId: selectedOrderId,
         paymentMethod: newPaymentMethod
-      }, {
-        headers: { Authorization: `Bearer ${jwt}` },
       });
-  
-      alert("Payment method updated");
+
+      showSnackbar("Payment method updated", "success");
       setModalOpen(false);
       setNewPaymentMethod('');
-      dispatch(getUserOrders(jwt));
-  
-    } catch (err) {
-      if (err.response?.status === 401) {
-        alert("Unauthorized to change payment method");
-      } else if (err.response?.status === 400) {
-        alert("Invalid payment method");
-      } else {
-        alert("Failed to update payment method");
-      }
-      console.error(err);
+      dispatch(getUserOrders());
+    } catch (error) {
+      showSnackbar(getErrorMessage(error, "Failed to update payment method"), "error");
     }
   };
-  
 
   return (
     <div className='flex items-center flex-col'>
       <h1 className='text-xl text-center py-7 font-semibold'>My Orders</h1>
       <div className='space-y-5 w-full lg:w-1/2'>
         {
-          order.orders.map(order =>
+          orders.map(order =>
             order.items.map(item =>
               <OrderCard
-                key={item.id}
+                key={`${order.id}-${item.id}`}
                 item={item}
                 order={order}
                 onCancel={handleCancel}
@@ -114,8 +99,8 @@ const Orders = () => {
             displayEmpty
           >
             <MenuItem value="" disabled>Select a payment method</MenuItem>
-            {paymentMethods.map((method, idx) => (
-              <MenuItem key={idx} value={method}>{method}</MenuItem>
+            {paymentMethods.map((method) => (
+              <MenuItem key={method} value={method}>{method}</MenuItem>
             ))}
           </Select>
           <Button
@@ -129,6 +114,17 @@ const Orders = () => {
           </Button>
         </Box>
       </Modal>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={closeSnackbar}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert onClose={closeSnackbar} severity={snackbar.severity} sx={{ width: "100%" }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </div>
   );
 };

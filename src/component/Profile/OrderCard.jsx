@@ -1,18 +1,19 @@
 import { Button, Card } from '@mui/material';
 import React from 'react';
 
+// Valid statuses: PENDING, OUT_FOR_DELIVERY, DELIVERED, COMPLETED, CANCELLED.
 const OrderCard = ({ item, order, onCancel, onChangePaymentMethod }) => {
-  const isCancelable = order.orderStatus === 'PENDING' || order.orderStatus === 'PLACED';
+  const isCancelable = order.orderStatus === 'PENDING';
   const canChangePayment = isCancelable;
 
   const handleCancel = () => {
-    if (onCancel && typeof onCancel === 'function') {
+    if (typeof onCancel === 'function') {
       onCancel(order.id);
     }
   };
 
   const handleChangePayment = () => {
-    if (onChangePaymentMethod && typeof onChangePaymentMethod === 'function') {
+    if (typeof onChangePaymentMethod === 'function') {
       onChangePaymentMethod(order.id);
     }
   };
@@ -20,10 +21,13 @@ const OrderCard = ({ item, order, onCancel, onChangePaymentMethod }) => {
   return (
     <Card className="flex justify-between items-center p-5 flex-wrap gap-4">
       <div className="flex items-center space-x-5">
-        <img className="h-16 w-16" src={item.food?.images[0]} alt="" />
+        {item.food?.images?.[0] && (
+          <img className="h-16 w-16" src={item.food.images[0]} alt="" />
+        )}
         <div>
-          <p>{item.food?.name}</p>
-          <p>₹{item.totalPrice}</p>
+          {/* Order items may arrive as { food: {...} } or the flat OrderDto shape { foodName, price }. */}
+          <p>{item.food?.name || item.foodName}</p>
+          <p>₹{Number(item.totalPrice ?? item.price ?? 0).toFixed(2)}</p>
         </div>
       </div>
 
@@ -38,7 +42,7 @@ const OrderCard = ({ item, order, onCancel, onChangePaymentMethod }) => {
           </Button>
         )}
 
-         {isCancelable && (
+        {isCancelable && (
           <Button color="error" variant="contained" onClick={handleCancel}>
             Cancel Order
           </Button>

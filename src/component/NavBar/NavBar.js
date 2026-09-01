@@ -1,5 +1,5 @@
 import { Avatar, Badge, IconButton } from '@mui/material';
-import React, { useEffect } from 'react';
+import React from 'react';
 import SearchIcon from '@mui/icons-material/Search';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { Person } from '@mui/icons-material';
@@ -10,35 +10,34 @@ import './NavBar.css';
 
 const NavBar = () => {
   const navigate = useNavigate();
-  const { auth, cart } = useSelector(store => store);
+  const user = useSelector(store => store.auth.user);
+  const cartItems = useSelector(store => store.cart.cartItems);
   const { i18n } = useTranslation();
 
   const handleAvatarClick = () => {
-    if (!auth.user) {
+    if (!user) {
       navigate("/account/login");
       return;
     }
-    if (auth.user.role !== "ADMIN") {
-      navigate("/my-profile");
-    } else {
+    if (user.role === "ADMIN") {
       navigate("/admin/restaurant");
+    } else {
+      navigate("/my-profile");
     }
   };
+
   const handleLanguageChange = (lng) => {
-  i18n.changeLanguage(lng);
-  localStorage.setItem('lang', lng);
-};
-
-
-  useEffect(() => {}, [auth, cart]);
+    i18n.changeLanguage(lng);
+    localStorage.setItem('lang', lng);
+  };
 
   return (
     <div className='px-5 sticky top-0 z-50 py-[.8rem] bg-[#e91e63] lg:px-20 flex justify-between'>
       {/* Logo */}
       <div className='lg:mr-10 cursor-pointer flex items-center space-x-4'>
-        <li onClick={() => navigate('/')} className='logo font-semibold text-gray-300 text-2xl'>
+        <span onClick={() => navigate('/')} className='logo font-semibold text-gray-300 text-2xl'>
           Foodiyapa
-        </li>
+        </span>
       </div>
 
       {/* Right Side */}
@@ -60,20 +59,11 @@ const NavBar = () => {
           </button>
         </div>
 
-        {/* Role (for ADMIN) */}
-        <div>
-          {auth.user?.role === 'ADMIN' && (
-            <IconButton>
-              {auth.user.role}
-            </IconButton>
-          )}
-        </div>
-
         {/* Avatar or Login Icon */}
         <div>
-          {auth.user ? (
-            <Avatar onClick={handleAvatarClick} sx={{ bgcolor: "white", color: "pink.A400" }}>
-              {(auth.user.fullName && auth.user.fullName[0]?.toUpperCase()) || auth.user.email?.[0]?.toUpperCase() || "U"}
+          {user ? (
+            <Avatar onClick={handleAvatarClick} sx={{ bgcolor: "white", color: "pink.A400", cursor: "pointer" }}>
+              {(user.fullName && user.fullName[0]?.toUpperCase()) || user.email?.[0]?.toUpperCase() || "U"}
             </Avatar>
           ) : (
             <IconButton onClick={() => navigate("/account/login")}>
@@ -86,7 +76,7 @@ const NavBar = () => {
         <div>
           <IconButton onClick={() => navigate("/cart")}>
             <Badge
-              badgeContent={cart?.cartItems?.length || 0}
+              badgeContent={cartItems?.length || 0}
               sx={{
                 "& .MuiBadge-badge": {
                   backgroundColor: "black",

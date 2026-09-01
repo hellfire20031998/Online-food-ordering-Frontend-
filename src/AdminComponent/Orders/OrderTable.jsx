@@ -4,28 +4,32 @@ import {
 } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
 import { fetchRestaurantsOrder, updateOrderStatus } from '../../component/State/Restaurant Order/Action';
 
 const orderStatus = [
   { label: "Pending", value: "PENDING" },
-  { label: "Completed", value: "COMPLETED" },
   { label: "Out For Delivery", value: "OUT_FOR_DELIVERY" },
-  { label: "Delivered", value: "DELIVERED" }
+  { label: "Delivered", value: "DELIVERED" },
+  { label: "Completed", value: "COMPLETED" },
+  { label: "Cancelled", value: "CANCELLED" }
 ];
 
-export default function OrderTable() {
+export default function OrderTable({ filterValue }) {
   const [menuAnchor, setMenuAnchor] = useState(null);
   const [selectedOrderId, setSelectedOrderId] = useState(null);
 
-  const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { restaurant, restaurantOrder } = useSelector((store) => store)
-  const jwt = localStorage.getItem('jwt');
+  const restaurantId = useSelector((store) => store.restaurant.usersRestaurant?.id);
+  const orders = useSelector((store) => store.restaurantOrder.orders);
 
   useEffect(() => {
-    dispatch(fetchRestaurantsOrder({ jwt, restaurantId: restaurant.usersRestaurant?.id }))
-  }, []);
+    if (!restaurantId) return;
+    dispatch(fetchRestaurantsOrder({ restaurantId }))
+  }, [dispatch, restaurantId]);
+
+  const visibleOrders = filterValue && filterValue !== "ALL"
+    ? orders.filter((order) => order.orderStatus === filterValue)
+    : orders;
 
   const handleClick = (event, orderId) => {
     setMenuAnchor(event.currentTarget);
@@ -38,7 +42,7 @@ export default function OrderTable() {
   };
 
   const handleUpdateOrder = (orderId, status) => {
-    dispatch(updateOrderStatus({ orderId, orderStatus: status, jwt }));
+    dispatch(updateOrderStatus({ orderId, orderStatus: status }));
     handleClose();
   };
 
@@ -61,7 +65,7 @@ export default function OrderTable() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {restaurantOrder.orders.map((item) => (
+              {visibleOrders.map((item) => (
                 <TableRow key={item.id}>
                   <TableCell>{item.id}</TableCell>
                   <TableCell align="right">
@@ -71,18 +75,18 @@ export default function OrderTable() {
                       ))}
                     </AvatarGroup>
                   </TableCell>
-                  <TableCell align="right">{item.totalPrice}</TableCell>
+                  <TableCell align="right">{Number(item.totalPrice ?? item.totalAmount ?? 0).toFixed(2)}</TableCell>
                   <TableCell align="right">{item.customer?.fullName}</TableCell>
                   <TableCell align="right">
                     {item.items.map((orderItem, i) => (
-                      <Chip key={i} label={orderItem.food?.name} sx={{ m: 0.3 }} />
+                      <Chip key={i} label={orderItem.food?.name || orderItem.foodName} sx={{ m: 0.3 }} />
                     ))}
                   </TableCell>
                   <TableCell align="right">
                     {item.items.map((orderItem, i) => (
                       <div key={i}>
-                        {orderItem.ingredients.map((ing, j) => (
-                          <Chip key={j} label={ing} sx={{ m: 0.3 }} />
+                        {orderItem.ingredients?.map((ing) => (
+                          <Chip key={ing} label={ing} sx={{ m: 0.3 }} />
                         ))}
                       </div>
                     ))}

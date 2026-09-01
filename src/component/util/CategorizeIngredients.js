@@ -1,13 +1,11 @@
 export const CategorizeIngredients = (ingredients) => {
-    // console.log("CategorizeIngredients ", ingredients)
+    if (!Array.isArray(ingredients)) return {};
     return ingredients.reduce((acc, ingredient) => {
-        const { category } = ingredient;
-        if (!acc[category.name]) {
-            acc[category.name] = [];
+        const categoryName = ingredient.category?.name || "Others";
+        if (!acc[categoryName]) {
+            acc[categoryName] = [];
         }
-
-        acc[category.name].push(ingredient);
+        acc[categoryName].push(ingredient);
         return acc;
-
-    }, {})
-}
+    }, {});
+};

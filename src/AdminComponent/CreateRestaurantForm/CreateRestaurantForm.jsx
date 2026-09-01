@@ -1,4 +1,4 @@
-import { AddPhotoAlternate, Close, Email } from '@mui/icons-material';
+import { AddPhotoAlternate } from '@mui/icons-material';
 import { Button, CircularProgress, Grid, IconButton, TextField } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { useFormik } from 'formik'
@@ -17,6 +17,7 @@ const initialValues = {
   postalCode: "",
   country: "",
   email: "",
+  mobile: "",
   twitter: "",
   instagram: "",
   openingHours: "Mon-Sun : 9:00AM - 9:00PM",
@@ -24,15 +25,13 @@ const initialValues = {
 }
 export default function CreateRestaurantForm() {
   const dispatch = useDispatch();
-  const jwt = localStorage.getItem("jwt")
-  const [uploadImage, setUplaodImage] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const formik = useFormik({
     initialValues,
     onSubmit: (values) => {
       const data = {
         name: values.name,
         description: values.description,
-        
         cuisineType: values.cuisineType,
         address: {
           streetAddress: values.streetAddress,
@@ -50,19 +49,19 @@ export default function CreateRestaurantForm() {
         openingHours: values.openingHours,
         images: values.images
       }
-      console.log("data ------", data)
-      dispatch(createRestaurant({ data, token: jwt }))
-
+      dispatch(createRestaurant(data))
     }
   });
   const handleImageChange = async (e) => {
     const file = e.target.files[0]
-    setUplaodImage(true)
-    const image = await uploadImageToCloudinary(file)
-    console.log("image-----", image)
-
-    formik.setFieldValue("images", [...formik.values.images, image])
-    setUplaodImage(false)
+    if (!file) return;
+    setUploadingImage(true)
+    try {
+      const image = await uploadImageToCloudinary(file)
+      formik.setFieldValue("images", [...formik.values.images, image])
+    } finally {
+      setUploadingImage(false)
+    }
   }
   const handleRemoveImage = (index) => {
     const updatedImage = [...formik.values.images]
@@ -90,13 +89,13 @@ export default function CreateRestaurantForm() {
 
                 </span>
                 {
-                  uploadImage && <div className='absolute left-0 right-0 top-0 bottom-0 w-24 h-24 flex justify-center items-center'>
+                  uploadingImage && <div className='absolute left-0 right-0 top-0 bottom-0 w-24 h-24 flex justify-center items-center'>
                     <CircularProgress />
                   </div>
                 }
               </label>
               <div className='flex flex-wrap gap-2'>
-                {formik.values.images.map((item, index) => <div className='relative' key={index}>
+                {formik.values.images.map((item, index) => <div className='relative' key={item}>
                   <img className='w-24 h-24 object-cover' src={item} alt='' />
                   <IconButton
                     size='small'

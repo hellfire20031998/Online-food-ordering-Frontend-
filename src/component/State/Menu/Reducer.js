@@ -56,7 +56,7 @@ const menuItemReducer = (state = initialState, action) => {
             return {
                 ...state,
                 loading: false,
-                menuItems: state.menuItems.filter(item => item.id !== action.payload.id),
+                menuItems: state.menuItems.filter(item => item.id !== action.payload),
                 message: "Menu item deleted successfully!"
             };
         case actionType.DELETE_MENU_ITEM_FAILURE:

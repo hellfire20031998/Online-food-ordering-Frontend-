@@ -1,5 +1,7 @@
 import {
-    GET_USERS_NOTIFICATION_SUCCESS,
+    CREATE_ORDER_FAILURE,
+    CREATE_ORDER_REQUEST,
+    CREATE_ORDER_SUCCESS,
     GET_USERS_ORDERS_FAILURE,
     GET_USERS_ORDERS_REQUEST,
     GET_USERS_ORDERS_SUCCESS,
@@ -8,12 +10,14 @@ import {
 const initialState = {
     loading: false,
     orders: [],
+    createdOrder: null,
     error: null,
     notifications: [],
 };
 
 export const orderReducer = (state = initialState, { type, payload }) => {
     switch (type) {
+        case CREATE_ORDER_REQUEST:
         case GET_USERS_ORDERS_REQUEST:
             return {
                 ...state,
@@ -21,26 +25,29 @@ export const orderReducer = (state = initialState, { type, payload }) => {
                 error: null,
             };
 
+        case CREATE_ORDER_SUCCESS:
+            return {
+                ...state,
+                loading: false,
+                createdOrder: payload,
+                error: null,
+            };
+
         case GET_USERS_ORDERS_SUCCESS:
             return {
                 ...state,
                 loading: false,
-                orders: payload, // assuming payload is an array of orders
+                orders: payload,
                 error: null,
             };
 
+        case CREATE_ORDER_FAILURE:
         case GET_USERS_ORDERS_FAILURE:
             return {
                 ...state,
                 loading: false,
-                error: payload, // assuming payload is the error message
+                error: payload,
             };
-
-        // case GET_USERS_NOTIFICATION_SUCCESS:
-        //     return {
-        //         ...state,
-        //         notifications: payload, // assuming payload is an array of notifications
-        //     };
 
         default:
             return state;

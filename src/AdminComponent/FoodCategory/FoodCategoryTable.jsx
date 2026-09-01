@@ -1,12 +1,10 @@
-import { Box, Card, CardActions, CardHeader, IconButton, Modal, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material'
+import { Box, Card, CardHeader, IconButton, Modal, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material'
 import React, { useEffect } from 'react'
-import CreateIcon from '@mui/icons-material/Create';
-import { Create, Delete } from '@mui/icons-material';
+import { Create } from '@mui/icons-material';
 import CreateFoodCategoryForm from './CreateFoodCategoryForm';
 import { useDispatch, useSelector } from 'react-redux';
 import { getRestaurantsCategory } from '../../component/State/Restaurant/Action';
 
-const orders = [1, 1, 1, 1, 1];
 const style = {
   position: 'absolute',
   top: '50%',
@@ -21,18 +19,18 @@ const style = {
 
 export default function FoodCategoryTable() {
   const dispatch = useDispatch();
-
-  const {category,restaurant} = useSelector(store=>store);
-  const jwt = localStorage.getItem('jwt')
+  const restaurantId = useSelector(store => store.restaurant.usersRestaurant?.id);
+  const categories = useSelector(store => store.restaurant.categories);
 
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
-  useEffect(()=>{
-        dispatch(getRestaurantsCategory({
-          jwt,restaurantId:restaurant.usersRestaurant?.id})
-        )
-      },[])
+
+  useEffect(() => {
+    if (!restaurantId) return;
+    dispatch(getRestaurantsCategory({ restaurantId }))
+  }, [dispatch, restaurantId])
+
   return (
     <Box>
       <Card className='m'>
@@ -43,31 +41,25 @@ export default function FoodCategoryTable() {
               <Create />
             </IconButton>
           }>
-
         </CardHeader>
         <TableContainer component={Paper}>
-          <Table sx={{ minWidth: 650 }} aria-label="simple table">
+          <Table sx={{ minWidth: 650 }} aria-label="food categories table">
             <TableHead>
               <TableRow>
-
                 <TableCell align="left">id</TableCell>
                 <TableCell align="left">name</TableCell>
-
               </TableRow>
             </TableHead>
             <TableBody>
-              {restaurant.categories.map((item,index) => (
+              {categories.map((item, index) => (
                 <TableRow
-                  key={item.name}
+                  key={item.id ?? item.name}
                   sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                 >
                   <TableCell component="th" scope="row">
-                    {index}
+                    {index + 1}
                   </TableCell>
-
-
                   <TableCell align="left">{item.name}</TableCell>
-
                 </TableRow>
               ))}
             </TableBody>
@@ -82,10 +74,9 @@ export default function FoodCategoryTable() {
         aria-describedby="modal-modal-description"
       >
         <Box sx={style}>
-         <CreateFoodCategoryForm/>
+          <CreateFoodCategoryForm />
         </Box>
       </Modal>
-
     </Box>
   )
 }

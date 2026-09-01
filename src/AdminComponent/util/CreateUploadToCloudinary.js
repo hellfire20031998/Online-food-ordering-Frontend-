@@ -19,5 +19,7 @@ export const uploadImageToCloudinary = async (file) => {
     }
 
     const fileData = await res.json();
-    return fileData.url;
+    // secure_url is https; the plain `url` field is http and would be
+    // blocked as mixed content on an https site.
+    return fileData.secure_url || fileData.url;
 };

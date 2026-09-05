@@ -5,14 +5,12 @@ import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { Person } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { useTranslation } from 'react-i18next';
 import './NavBar.css';
 
 const NavBar = () => {
   const navigate = useNavigate();
   const user = useSelector(store => store.auth.user);
   const cartItems = useSelector(store => store.cart.cartItems);
-  const { i18n } = useTranslation();
 
   const handleAvatarClick = () => {
     if (!user) {
@@ -24,11 +22,6 @@ const NavBar = () => {
     } else {
       navigate("/my-profile");
     }
-  };
-
-  const handleLanguageChange = (lng) => {
-    i18n.changeLanguage(lng);
-    localStorage.setItem('lang', lng);
   };
 
   return (
@@ -47,16 +40,6 @@ const NavBar = () => {
           <IconButton>
             <SearchIcon sx={{ fontSize: "1.5rem" }} />
           </IconButton>
-        </div>
-
-        {/* Language Toggle */}
-        <div>
-          <button
-            onClick={() => handleLanguageChange(i18n.language === 'en' ? 'hi' : 'en')}
-            className='text-white font-medium bg-black px-3 py-1 rounded'
-          >
-            {i18n.language === 'hi' ? 'हिन्दी' : 'English'}
-          </button>
         </div>
 
         {/* Avatar or Login Icon */}

@@ -10,7 +10,6 @@ import {
 } from "@mui/material";
 import { Field, Form, Formik } from "formik";
 import React, { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
 import { api, getErrorMessage } from "../../component/config/api";
 import { useSelector } from "react-redux";
 
@@ -26,7 +25,6 @@ const initialValues = {
 const AssignRolePage = () => {
   const [message, setMessage] = useState(null);
   const [roles, setRoles] = useState([]);
-  const { t } = useTranslation();
 
   const restaurantId = useSelector(store => store.restaurant.usersRestaurant?.id);
 
@@ -68,7 +66,7 @@ const AssignRolePage = () => {
   return (
     <div style={{ maxWidth: 500, margin: "auto", padding: 20 }}>
       <Typography variant="h5" align="center" gutterBottom>
-        {t("assign_role_to_restaurant")}
+        Assign Role to Restaurant
       </Typography>
 
       <Formik initialValues={initialValues} onSubmit={handleSubmit}>
@@ -77,7 +75,7 @@ const AssignRolePage = () => {
             <Field
               as={TextField}
               name="fullName"
-              label={t("fullName")}
+              label="Full Name"
               fullWidth
               variant="outlined"
               margin="normal"
@@ -85,7 +83,7 @@ const AssignRolePage = () => {
             <Field
               as={TextField}
               name="email"
-              label={t("email")}
+              label="Email"
               fullWidth
               variant="outlined"
               margin="normal"
@@ -93,7 +91,7 @@ const AssignRolePage = () => {
             <Field
               as={TextField}
               name="password"
-              label={t("password")}
+              label="Password"
               fullWidth
               variant="outlined"
               margin="normal"
@@ -101,12 +99,12 @@ const AssignRolePage = () => {
             />
 
             <FormControl fullWidth margin="normal">
-              <InputLabel id="role-label">{t("role")}</InputLabel>
+              <InputLabel id="role-label">Role</InputLabel>
               <Select
                 labelId="role-label"
                 id="role-select"
                 value={values.role}
-                label={t("role")}
+                label="Role"
                 onChange={(e) => setFieldValue("role", e.target.value)}
               >
                 {roles.map((role) => (
@@ -124,7 +122,7 @@ const AssignRolePage = () => {
               variant="contained"
               color="primary"
             >
-              {t("create_and_assign")}
+              Create and Assign
             </Button>
           </Form>
         )}

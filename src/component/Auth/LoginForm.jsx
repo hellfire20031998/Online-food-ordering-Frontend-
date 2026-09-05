@@ -5,7 +5,6 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import * as Yup from 'yup'
 import { loginUser } from '../State/Authentication/Action'
-import { useTranslation } from 'react-i18next'
 
 const initialValues = {
   email: "",
@@ -20,7 +19,6 @@ const validationSchema = Yup.object({
 const LoginForm = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const { t } = useTranslation()
   const error = useSelector(store => store.auth.error)
   const isLoading = useSelector(store => store.auth.isLoading)
 
@@ -31,12 +29,12 @@ const LoginForm = () => {
   return (
     <div>
       <Typography variant='h5' className='text-center'>
-        {t("login")}
+        Login
       </Typography>
 
       {error && (
         <Alert severity="error" sx={{ mt: 2 }}>
-          {typeof error === "string" ? error : t("login_failed")}
+          {typeof error === "string" ? error : "Login failed"}
         </Alert>
       )}
 
@@ -49,7 +47,7 @@ const LoginForm = () => {
           <Field
             as={TextField}
             name="email"
-            label={t("email")}
+            label="Email"
             fullWidth
             variant="outlined"
             margin="normal"
@@ -59,7 +57,7 @@ const LoginForm = () => {
             as={TextField}
             name="password"
             type="password"
-            label={t("password")}
+            label="Password"
             fullWidth
             variant="outlined"
             margin="normal"
@@ -73,15 +71,15 @@ const LoginForm = () => {
             variant='contained'
             disabled={isLoading}
           >
-            {t('login')}
+            Login
           </Button>
         </Form>
       </Formik>
 
       <Typography variant='body2' align='center' sx={{ mt: 3 }}>
-        {t("dont_have_account")}
+        Don't have an account?
         <Button size='small' onClick={() => navigate("/account/register")}>
-          {t("register")}
+          Register
         </Button>
       </Typography>
     </div>

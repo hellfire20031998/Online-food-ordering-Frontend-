@@ -16,7 +16,6 @@ import { useNavigate } from "react-router-dom";
 import * as Yup from "yup";
 import { registerUser } from "../State/Authentication/Action";
 import { api } from "../config/api";
-import { useTranslation } from "react-i18next";
 
 const initialValues = {
   fullName: "",
@@ -42,7 +41,6 @@ const RegisterForm = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [roles, setRoles] = useState([]);
-  const { t } = useTranslation();
   const error = useSelector(store => store.auth.error);
   const isLoading = useSelector(store => store.auth.isLoading);
 
@@ -59,12 +57,12 @@ const RegisterForm = () => {
   return (
     <div>
       <Typography variant="h5" className="text-center">
-        {t("register")}
+        Register
       </Typography>
 
       {error && (
         <Alert severity="error" sx={{ mt: 2 }}>
-          {typeof error === "string" ? error : t("registration_failed")}
+          {typeof error === "string" ? error : "Registration failed"}
         </Alert>
       )}
 
@@ -78,7 +76,7 @@ const RegisterForm = () => {
             <Field
               as={TextField}
               name="fullName"
-              label={t("fullName")}
+              label="Full Name"
               fullWidth
               variant="outlined"
               margin="normal"
@@ -87,7 +85,7 @@ const RegisterForm = () => {
             <Field
               as={TextField}
               name="email"
-              label={t("email")}
+              label="Email"
               fullWidth
               variant="outlined"
               margin="normal"
@@ -96,7 +94,7 @@ const RegisterForm = () => {
             <Field
               as={TextField}
               name="password"
-              label={t("password")}
+              label="Password"
               fullWidth
               variant="outlined"
               margin="normal"
@@ -104,11 +102,11 @@ const RegisterForm = () => {
             />
             <ErrorMessage name="password" component="div" className="text-red-500 text-sm" />
             <FormControl fullWidth margin="normal" error={touched.role && Boolean(errors.role)}>
-              <InputLabel id="role-simple-select-label">{t("role")}</InputLabel>
+              <InputLabel id="role-simple-select-label">Role</InputLabel>
               <Select
                 labelId="role-simple-select-label"
                 id="role-simple-select"
-                label={t("role")}
+                label="Role"
                 name="role"
                 value={values.role}
                 onChange={handleChange}
@@ -129,16 +127,16 @@ const RegisterForm = () => {
               variant="contained"
               disabled={isLoading}
             >
-              {t("register")}
+              Register
             </Button>
           </Form>
         )}
       </Formik>
 
       <Typography variant="body2" align="center" sx={{ mt: 3 }}>
-        {t("already_have_account")}
+        Already have an account?
         <Button size="small" onClick={() => navigate("/account/login")}>
-          {t("login")}
+          Login
         </Button>
       </Typography>
     </div>

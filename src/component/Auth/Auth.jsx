@@ -1,4 +1,5 @@
-import { Box, Modal } from '@mui/material'
+import { Box, IconButton, Modal } from '@mui/material'
+import CloseIcon from '@mui/icons-material/Close';
 import React from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import RegisterForm from './RegisterForm';
@@ -11,6 +12,7 @@ const style = {
     left: '50%',
     transform: 'translate(-50%, -50%)',
     width: 400,
+    maxWidth: 'calc(100vw - 2rem)',
     bgcolor: 'background.paper',
     outline: "none",
     boxShadow: 24,
@@ -33,6 +35,14 @@ const Auth = () => {
                 || location.pathname === "/account/login"
             }>
                 <Box sx={style}>
+                    <IconButton
+                        aria-label="Close"
+                        onClick={handleOnClose}
+                        size="small"
+                        sx={{ position: 'absolute', top: 8, right: 8, color: 'text.secondary' }}
+                    >
+                        <CloseIcon />
+                    </IconButton>
                     {location.pathname === "/account/register" ? <RegisterForm /> : <LoginForm />}
                 </Box>
             </Modal>

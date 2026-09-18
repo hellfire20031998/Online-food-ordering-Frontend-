@@ -8,6 +8,7 @@ import { getUser } from './component/State/Authentication/Action';
 import { findCart } from './component/State/Cart/Action';
 import Routers from './Routers/Routers';
 import { getRestaurantByUserId } from './component/State/Restaurant/Action';
+import { isTeamRole } from './component/config/roles';
 
 function App() {
   const dispatch = useDispatch();
@@ -18,13 +19,17 @@ function App() {
   useEffect(() => {
     if (!token) return;
     dispatch(getUser());
-    dispatch(findCart());
   }, [dispatch, token]);
 
   useEffect(() => {
+    if (!token || !user) return;
+    // Platform team accounts have no cart or restaurant of their own.
+    if (isTeamRole(user.role)) return;
+    dispatch(findCart());
     // Only restaurant owners/admins have a restaurant to load.
-    if (!token || user?.role !== "ADMIN") return;
-    dispatch(getRestaurantByUserId());
+    if (user.role === "ADMIN") {
+      dispatch(getRestaurantByUserId());
+    }
   }, [dispatch, token, user]);
 
   return (

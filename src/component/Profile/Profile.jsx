@@ -4,6 +4,7 @@ import { Route, Routes } from 'react-router-dom'
 import UserProfile from './UserProfile'
 import Orders from './Orders'
 import Favorities from './Favorities'
+import RefundAccount from './RefundAccount'
 
 const Profile = () => {
   const [openSideBar, setOpenSideBar] = useState(false)
@@ -17,6 +18,7 @@ const Profile = () => {
             <Route path='/' element={<UserProfile/>}/>
             <Route path='/orders' element={<Orders/>}/>
             <Route path='/favorites' element={<Favorities/>}/>
+            <Route path='/refund-account' element={<RefundAccount/>}/>
           </Routes>
         </div>
     </div>

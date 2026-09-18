@@ -4,6 +4,7 @@ import CategoryIcon from '@mui/icons-material/Category';
 import FastfoodIcon from '@mui/icons-material/Fastfood';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import LogoutIcon from '@mui/icons-material/Logout';
+import PaymentsIcon from '@mui/icons-material/Payments';
 import { Divider, Drawer, useMediaQuery } from '@mui/material';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -17,6 +18,7 @@ const menu = [
   { title: "Food Category", icon: <CategoryIcon />, path: "/category" },
   { title: "Ingredient", icon: <FastfoodIcon />, path: "/ingredients" },
   { title: "Details", icon: <AdminPanelSettingsIcon />, path: "/details" },
+  { title: "Payouts", icon: <PaymentsIcon />, path: "/payouts" },
   { title: "Logout", icon: <LogoutIcon />, path: "/" },
 ];
 

@@ -1,5 +1,6 @@
 import { ADD_TO_FAVORITE_FAILURE, ADD_TO_FAVORITE_REQUEST, ADD_TO_FAVORITE_SUCCESS, GET_USER_FAILURE, GET_USER_REQUEST, GET_USER_SUCCESS, LOGIN_FAILURE, LOGIN_REQUEST, LOGIN_SUCCESS, LOGOUT, REGISTER_FAILURE, REGISTER_REQUEST, REGISTER_SUCCESS } from "./ActionTypes"
 import { api, getErrorMessage, profile } from "../../config/api"
+import { homeRouteForRole } from "../../config/roles"
 import { getAllRestaurantsAction } from "../Restaurant/Action"
 
 export const registerUser = (reqData) => async (dispatch) => {
@@ -8,11 +9,7 @@ export const registerUser = (reqData) => async (dispatch) => {
         const { data } = await api.post(`auth/signup`, reqData.userData)
 
         if (data.jwt) localStorage.setItem("jwt", data.jwt)
-        if (data.role === "ADMIN") {
-            reqData.navigate("/admin/restaurant")
-        } else {
-            reqData.navigate("/")
-        }
+        reqData.navigate(homeRouteForRole(data.role))
 
         dispatch({ type: REGISTER_SUCCESS, payload: data.jwt })
         dispatch(getUser())
@@ -28,11 +25,7 @@ export const loginUser = (reqData) => async (dispatch) => {
         const { data } = await api.post(`auth/signin`, reqData.userData)
 
         if (data.jwt) localStorage.setItem("jwt", data.jwt)
-        if (data.role === "ADMIN") {
-            reqData.navigate("/admin/restaurant")
-        } else {
-            reqData.navigate("/")
-        }
+        reqData.navigate(homeRouteForRole(data.role))
 
         dispatch({ type: LOGIN_SUCCESS, payload: data.jwt })
         dispatch(getUser())

@@ -4,6 +4,7 @@ import XIcon from '@mui/icons-material/X';
 import React from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { updateRestaurantStatus } from '../../component/State/Restaurant/Action';
+import PayoutAccountCard from './PayoutAccountCard';
 
 export default function RestaurantDetails() {
   const usersRestaurant = useSelector(store => store.restaurant.usersRestaurant);
@@ -200,12 +201,16 @@ export default function RestaurantDetails() {
 
 
                 </div>
-                
+
               </CardContent>
             </Card>
           </Grid>
+
+          <Grid item xs={12}>
+            <PayoutAccountCard restaurantId={usersRestaurant?.id} />
+          </Grid>
         </Grid>
-      
+
     </div>
   )
 }

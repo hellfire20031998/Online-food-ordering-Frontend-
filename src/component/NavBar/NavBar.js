@@ -1,10 +1,11 @@
-import { Avatar, Badge, IconButton } from '@mui/material';
+import { Avatar, Badge, Button, IconButton } from '@mui/material';
 import React from 'react';
 import SearchIcon from '@mui/icons-material/Search';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { Person } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { isTeamRole } from '../config/roles';
 import './NavBar.css';
 
 const NavBar = () => {
@@ -17,7 +18,9 @@ const NavBar = () => {
       navigate("/account/login");
       return;
     }
-    if (user.role === "ADMIN") {
+    if (isTeamRole(user.role)) {
+      navigate("/team");
+    } else if (user.role === "ADMIN") {
       navigate("/admin/restaurant");
     } else {
       navigate("/my-profile");
@@ -35,6 +38,17 @@ const NavBar = () => {
 
       {/* Right Side */}
       <div className='flex items-center space-x-2 lg:space-x-10'>
+        {/* Restaurant owner onboarding (hidden for platform team accounts) */}
+        {!isTeamRole(user?.role) && (
+          <Button
+            size="small"
+            onClick={() => navigate("/partner")}
+            sx={{ color: "white", textTransform: "none", display: { xs: "none", md: "inline-flex" } }}
+          >
+            {user?.role === "ADMIN" ? "My restaurant" : "Partner with us"}
+          </Button>
+        )}
+
         {/* Search */}
         <div>
           <IconButton>

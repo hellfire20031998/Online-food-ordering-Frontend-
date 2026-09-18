@@ -91,7 +91,14 @@ export default function OrderTable({ filterValue }) {
                       </div>
                     ))}
                   </TableCell>
-                  <TableCell align="right">{item.orderStatus}</TableCell>
+                  <TableCell align="right">
+                    {item.orderStatus}
+                    {item.payment && (
+                      <div>
+                        <Chip size="small" label={item.payment.status.replace(/_/g, ' ')} variant="outlined" sx={{ mt: 0.5 }} />
+                      </div>
+                    )}
+                  </TableCell>
                   <TableCell align="right">
                     <Button onClick={(e) => handleClick(e, item.id)}>Update</Button>
                   </TableCell>

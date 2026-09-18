@@ -8,6 +8,7 @@ import FoodCategory from '../FoodCategory/FoodCategory'
 import Ingredients from '../Ingredients/Ingredients'
 import RestaurantDetails from './RestaurantDetails'
 import CreateMenuForm from '../Menu/CreateMenuForm'
+import OwnerPayouts from '../Payouts/Payouts'
 import { useDispatch, useSelector } from 'react-redux'
 import { getRestaurantsCategory } from '../../component/State/Restaurant/Action'
 import { fetchRestaurantsOrder } from '../../component/State/Restaurant Order/Action'
@@ -36,6 +37,7 @@ export default function Admin() {
             <Route path='/category' element={<FoodCategory />} />
             <Route path='/ingredients' element={<Ingredients />} />
             <Route path='/details' element={<RestaurantDetails />} />
+            <Route path='/payouts' element={<OwnerPayouts />} />
             <Route path='/add-menu' element={<CreateMenuForm />} />
           </Routes>
         </div>

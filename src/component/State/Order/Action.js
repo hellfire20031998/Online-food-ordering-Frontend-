@@ -12,7 +12,10 @@ export const createOrder = (order) => async (dispatch) => {
         const createdOrder = response.data
 
         dispatch({ type: CREATE_ORDER_SUCCESS, payload: createdOrder })
-        dispatch(clearCartAction())
+        // Online orders keep the cart until the gateway confirms the payment.
+        if (createdOrder.orderStatus !== "PAYMENT_PENDING") {
+            dispatch(clearCartAction())
+        }
         return { success: true, data: createdOrder }
     } catch (error) {
         const status = error.response?.status

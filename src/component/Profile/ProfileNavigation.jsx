@@ -3,6 +3,7 @@ import React from 'react';
 import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import HomeIcon from '@mui/icons-material/Home';
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
@@ -11,6 +12,7 @@ import { logout } from '../State/Authentication/Action';
 const menu = [
   { title: "Orders", icon: <ShoppingBagIcon />, path: "/my-profile/orders" },
   { title: "Favorites", icon: <FavoriteIcon />, path: "/my-profile/favorites" },
+  { title: "Refund account", icon: <AccountBalanceIcon />, path: "/my-profile/refund-account" },
   { title: "Home", icon: <HomeIcon />, path: "/" },
   { title: "Logout", icon: <LogoutIcon />, path: "/" }
 ];

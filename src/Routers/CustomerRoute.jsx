@@ -7,6 +7,7 @@ import Profile from '../component/Profile/Profile'
 import Home from '../component/Home/Home'
 import Auth from '../component/Auth/Auth'
 import ProtectedRoute from './ProtectedRoute'
+import PartnerApplication from '../component/Partner/PartnerApplication'
 
 const CustomerRoute = () => {
   return (
@@ -29,6 +30,14 @@ const CustomerRoute = () => {
           element={
             <ProtectedRoute>
               <Profile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/partner'
+          element={
+            <ProtectedRoute>
+              <PartnerApplication />
             </ProtectedRoute>
           }
         />

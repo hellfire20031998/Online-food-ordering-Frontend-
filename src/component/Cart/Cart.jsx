@@ -23,7 +23,10 @@ import * as Yup from "yup";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { createOrder } from "../State/Order/Action";
+import { clearCartAction } from "../State/Cart/Action";
 import { api, getErrorMessage } from "../config/api";
+import { PAYMENT_METHOD_LABELS, paymentApi } from "../Payment/paymentApi";
+import StripePaymentDialog from "../Payment/StripePaymentDialog";
 
 const DELIVERY_FEE = 21;
 const GST_AND_CHARGES = 50;
@@ -71,6 +74,8 @@ const Cart = () => {
     const [addresses, setAddresses] = useState([]);
     const [paymentMethod, setPaymentMethod] = useState("");
     const [paymentMethods, setPaymentMethods] = useState([]);
+    const [paymentConfig, setPaymentConfig] = useState(null);
+    const [paymentSession, setPaymentSession] = useState(null); // { payment } while paying online
     const [placingOrder, setPlacingOrder] = useState(false);
     const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "info" });
 
@@ -118,9 +123,14 @@ const Cart = () => {
             });
     }, []);
 
+    // Online methods are only offered when a payment gateway is configured on the server.
     const fetchPayments = useCallback(() => {
-        api.get(`api/payment-methods`)
-            .then((res) => setPaymentMethods(res.data))
+        Promise.all([api.get(`api/payment-methods`), paymentApi.config()])
+            .then(([methodsRes, config]) => {
+                setPaymentConfig(config);
+                const all = methodsRes.data || [];
+                setPaymentMethods(config.onlinePaymentsEnabled ? all : all.filter((m) => m === "CASH_ON_DELIVERY"));
+            })
             .catch((error) => {
                 showSnackbar(getErrorMessage(error, "Could not load payment methods"), "error");
             });
@@ -155,12 +165,32 @@ const Cart = () => {
         );
         setPlacingOrder(false);
 
-        if (result?.success) {
-            showSnackbar("Your order was placed successfully", "success");
-            navigate("/my-profile/orders");
-        } else {
+        if (!result?.success) {
             showSnackbar(result?.message || "Failed to place order", "error");
+            return;
         }
+
+        const order = result.data;
+        if (order.orderStatus === "PAYMENT_PENDING" && order.payment?.clientSecret) {
+            // Online payment: complete it here; the order becomes visible to the restaurant once paid.
+            setPaymentSession({ payment: order.payment });
+            return;
+        }
+        showSnackbar("Your order was placed successfully", "success");
+        navigate("/my-profile/orders");
+    };
+
+    const handlePaid = () => {
+        setPaymentSession(null);
+        dispatch(clearCartAction());
+        showSnackbar("Payment received. Your order is on its way to the restaurant.", "success");
+        navigate("/my-profile/orders");
+    };
+
+    const handlePayLater = () => {
+        setPaymentSession(null);
+        showSnackbar("Order saved. You can pay any time from My Orders.", "info");
+        navigate("/my-profile/orders");
     };
 
     return (
@@ -186,7 +216,7 @@ const Cart = () => {
                             >
                                 {paymentMethods.map((method) => (
                                     <MenuItem key={method} value={method}>
-                                        {method}
+                                        {PAYMENT_METHOD_LABELS[method] || method}
                                     </MenuItem>
                                 ))}
                             </Select>
@@ -306,6 +336,15 @@ const Cart = () => {
                     </Formik>
                 </Box>
             </Modal>
+
+            {paymentSession && (
+                <StripePaymentDialog
+                    publishableKey={paymentConfig?.publishableKey}
+                    payment={paymentSession.payment}
+                    onSuccess={handlePaid}
+                    onClose={handlePayLater}
+                />
+            )}
 
             <Snackbar
                 open={snackbar.open}

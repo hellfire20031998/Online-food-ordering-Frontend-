@@ -9,7 +9,7 @@
     "@mui/material": "^6.4.6",
     "@reduxjs/toolkit": "^2.11.2",
     "@stripe/react-stripe-js": "^6.9.0",
-    "@stripe/stripe-js": "^7.10.0",
+    "@stripe/stripe-js": "^9.16.0",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",

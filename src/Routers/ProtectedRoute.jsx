@@ -1,13 +1,14 @@
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Box, CircularProgress } from '@mui/material';
 import { homeRouteForRole } from '../component/config/roles';
+import { setPostLoginRedirect } from '../component/config/session';
 
 /**
  * Guards a route behind authentication and (optionally) a role.
  *
- * - No JWT at all -> redirect to the login modal route.
+ * - No JWT at all -> remember where the user was and redirect to the login modal route.
  * - A role restriction is set but the user profile has not loaded yet -> spinner
  *   (avoids a redirect flicker while GET /api/users/profile is in flight).
  * - Wrong role -> redirect to that user's own home.
@@ -18,8 +19,10 @@ import { homeRouteForRole } from '../component/config/roles';
 const ProtectedRoute = ({ children, requiredRole, allowedRoles }) => {
     const jwt = useSelector(store => store.auth.jwt) || localStorage.getItem('jwt');
     const user = useSelector(store => store.auth.user);
+    const location = useLocation();
 
     if (!jwt) {
+        setPostLoginRedirect(location.pathname + location.search);
         return <Navigate to="/account/login" replace />;
     }
 

@@ -3,6 +3,7 @@ import React from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import RegisterForm from './RegisterForm';
 import LoginForm from './LoginForm';
+import { consumePostLoginRedirect } from '../config/session';
 
 const style = {
     position: 'absolute',
@@ -17,29 +18,26 @@ const style = {
 };
 
 const Auth = () => {
-    const location= useLocation();
-    const navigate= useNavigate();
+    const location = useLocation();
+    const navigate = useNavigate();
 
-    const handleOnClose=()=>{
-        navigate("/")
+    // Closing without signing in returns the visitor to where they were (e.g. the cart).
+    const handleOnClose = () => {
+        navigate(consumePostLoginRedirect() || "/")
     }
-  return (
-    <>
-    <Modal onClose={handleOnClose} open={
-        location.pathname==="/account/register"
-        || location.pathname==="/account/login"
-        
-    }>
-        <Box sx={style}>
-            {
-                location.pathname==="/account/register" ? <RegisterForm/> : <LoginForm/>
-            }
 
-        </Box>
-
-    </Modal>
-    </>
-  )
+    return (
+        <>
+            <Modal onClose={handleOnClose} open={
+                location.pathname === "/account/register"
+                || location.pathname === "/account/login"
+            }>
+                <Box sx={style}>
+                    {location.pathname === "/account/register" ? <RegisterForm /> : <LoginForm />}
+                </Box>
+            </Modal>
+        </>
+    )
 }
 
 export default Auth

@@ -5,7 +5,7 @@ import { CssBaseline } from '@mui/material';
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getUser } from './component/State/Authentication/Action';
-import { findCart } from './component/State/Cart/Action';
+import { findCart, loadGuestCartAction } from './component/State/Cart/Action';
 import Routers from './Routers/Routers';
 import { getRestaurantByUserId } from './component/State/Restaurant/Action';
 import { isTeamRole } from './component/config/roles';
@@ -17,7 +17,11 @@ function App() {
   const token = jwt || localStorage.getItem("jwt");
 
   useEffect(() => {
-    if (!token) return;
+    if (!token) {
+      // Visitors keep a cart in the browser until they sign in.
+      dispatch(loadGuestCartAction());
+      return;
+    }
     dispatch(getUser());
   }, [dispatch, token]);
 

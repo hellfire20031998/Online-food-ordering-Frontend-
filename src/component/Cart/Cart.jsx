@@ -26,6 +26,7 @@ import { createOrder } from "../State/Order/Action";
 import { clearCartAction } from "../State/Cart/Action";
 import { api, getErrorMessage } from "../config/api";
 import { PAYMENT_METHOD_LABELS, paymentApi } from "../Payment/paymentApi";
+import { setPostLoginRedirect } from "../config/session";
 import StripePaymentDialog from "../Payment/StripePaymentDialog";
 
 const DELIVERY_FEE = 21;
@@ -68,6 +69,8 @@ const Cart = () => {
     const navigate = useNavigate();
     const cart = useSelector((store) => store.cart.cart);
     const cartItems = useSelector((store) => store.cart.cartItems);
+    const jwt = useSelector((store) => store.auth.jwt) || localStorage.getItem("jwt");
+    const isGuest = !jwt;
 
     const [open, setOpen] = useState(false);
     const [selectedAddress, setSelectedAddress] = useState(null);
@@ -84,8 +87,9 @@ const Cart = () => {
 
     const closeSnackbar = () => setSnackbar((prev) => ({ ...prev, open: false }));
 
-    // The whole cart belongs to one restaurant; take it from the first item's food.
-    const restaurantId = cartItems?.[0]?.food?.restaurant?.id;
+    // The whole cart belongs to one restaurant.
+    const restaurantId = cart?.restaurantId ?? cartItems?.[0]?.food?.restaurantId;
+    const restaurantName = cart?.restaurantName ?? cartItems?.[0]?.food?.restaurantName;
 
     const itemTotal = Number(cart?.total) || 0;
     const totalPay = itemTotal + DELIVERY_FEE + GST_AND_CHARGES;
@@ -137,9 +141,15 @@ const Cart = () => {
     }, []);
 
     useEffect(() => {
+        if (isGuest) return; // addresses and payment methods belong to an account
         fetchAddresses();
         fetchPayments();
-    }, [fetchAddresses, fetchPayments]);
+    }, [fetchAddresses, fetchPayments, isGuest]);
+
+    const signInToOrder = () => {
+        setPostLoginRedirect("/cart");
+        navigate("/account/login");
+    };
 
     const placeOrder = async () => {
         if (!cartItems || cartItems.length === 0) {
@@ -198,31 +208,41 @@ const Cart = () => {
             <main className="lg:flex justify-between">
                 {/* LEFT PANEL */}
                 <section className="lg:w-[30%] space-y-6 lg:min-h-screen pt-10">
+                    {restaurantName && (
+                        <p className="px-5 text-gray-400 text-sm">Ordering from <span className="text-white">{restaurantName}</span></p>
+                    )}
+                    {cartItems.length === 0 && (
+                        <p className="px-5 text-gray-400">Your cart is empty. Browse a restaurant to add dishes.</p>
+                    )}
                     {cartItems.map((item) => (
                         <CartItem item={item} key={item.id} />
                     ))}
                     <Divider />
-                    <div className="py-5 px-5">
-                        <h2 className="text-lg font-semibold mb-2 text-center">
-                            Select Payment Method
-                        </h2>
-                        <FormControl fullWidth>
-                            <InputLabel id="payment-method-label">Payment Method</InputLabel>
-                            <Select
-                                labelId="payment-method-label"
-                                value={paymentMethod}
-                                onChange={(e) => setPaymentMethod(e.target.value)}
-                                label="Payment Method"
-                            >
-                                {paymentMethods.map((method) => (
-                                    <MenuItem key={method} value={method}>
-                                        {PAYMENT_METHOD_LABELS[method] || method}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
-                    </div>
-                    <Divider />
+                    {!isGuest && (
+                        <>
+                            <div className="py-5 px-5">
+                                <h2 className="text-lg font-semibold mb-2 text-center">
+                                    Select Payment Method
+                                </h2>
+                                <FormControl fullWidth>
+                                    <InputLabel id="payment-method-label">Payment Method</InputLabel>
+                                    <Select
+                                        labelId="payment-method-label"
+                                        value={paymentMethod}
+                                        onChange={(e) => setPaymentMethod(e.target.value)}
+                                        label="Payment Method"
+                                    >
+                                        {paymentMethods.map((method) => (
+                                            <MenuItem key={method} value={method}>
+                                                {PAYMENT_METHOD_LABELS[method] || method}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                            </div>
+                            <Divider />
+                        </>
+                    )}
                     <div className="billDetails px-5 text-sm">
                         <p className="font-extralight py-5">Bill Details</p>
                         <div className="space-y-3">
@@ -245,15 +265,26 @@ const Cart = () => {
                             <p>{totalPay.toFixed(2)}</p>
                         </div>
                     </div>
-                    <div className="py-5 flex justify-center">
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            disabled={!selectedAddress || !paymentMethod || placingOrder || cartItems.length === 0}
-                            onClick={placeOrder}
-                        >
-                            {placingOrder ? "Placing Order..." : "Place Order"}
-                        </Button>
+                    <div className="py-5 flex flex-col items-center gap-2">
+                        {isGuest ? (
+                            <>
+                                <Button variant="contained" color="primary" disabled={cartItems.length === 0} onClick={signInToOrder}>
+                                    Sign in to place order
+                                </Button>
+                                <p className="text-gray-400 text-xs text-center px-5">
+                                    Your cart is saved in this browser for 7 days and will be waiting after you sign in.
+                                </p>
+                            </>
+                        ) : (
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                disabled={!selectedAddress || !paymentMethod || placingOrder || cartItems.length === 0}
+                                onClick={placeOrder}
+                            >
+                                {placingOrder ? "Placing Order..." : "Place Order"}
+                            </Button>
+                        )}
                     </div>
                 </section>
 
@@ -261,6 +292,18 @@ const Cart = () => {
 
                 {/* RIGHT PANEL */}
                 <section className="lg:w-[70%] flex justify-center px-5 pb-10 lg:pb-0">
+                    {isGuest ? (
+                        <div className="py-16 text-center space-y-4 max-w-md">
+                            <h1 className="font-semibold text-2xl">Almost there</h1>
+                            <p className="text-gray-400">
+                                Sign in or create an account to choose a delivery address and pay. Browsing and building your cart never needs an account.
+                            </p>
+                            <div className="flex gap-3 justify-center">
+                                <Button variant="contained" onClick={signInToOrder}>Sign in</Button>
+                                <Button variant="outlined" onClick={() => { setPostLoginRedirect("/cart"); navigate("/account/register"); }}>Create account</Button>
+                            </div>
+                        </div>
+                    ) : (
                     <div>
                         <h1 className="text-center font-semibold text-2xl py-10">
                             Choose Delivery Address
@@ -290,6 +333,7 @@ const Cart = () => {
                             </Card>
                         </div>
                     </div>
+                    )}
                 </section>
             </main>
 

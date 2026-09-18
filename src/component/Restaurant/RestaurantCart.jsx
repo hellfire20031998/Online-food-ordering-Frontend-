@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { addToFavorite } from '../State/Authentication/Action';
 import { isPresentInFavorites } from '../config/logic';
+import { setPostLoginRedirect } from '../config/session';
 
 const RestaurantCart = ({ item }) => {
     const navigate = useNavigate();
@@ -15,6 +16,12 @@ const RestaurantCart = ({ item }) => {
     const isFavorite = isPresentInFavorites(favorites, item);
 
     const handleAddToFavourite = () => {
+        if (!localStorage.getItem("jwt")) {
+            // Favourites belong to an account: ask the visitor to sign in and come back here.
+            setPostLoginRedirect(window.location.pathname);
+            navigate("/account/login");
+            return;
+        }
         dispatch(addToFavorite({ restaurantId: item.id }))
     }
 

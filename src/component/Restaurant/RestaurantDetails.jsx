@@ -116,7 +116,7 @@ const RestaurantDetails = () => {
                 </div>
 
                 <div className='space-y-5 lg:w-[80%] lg:pl-10'>
-                    {menuItems.map((item) => <MenuCard key={item.id} item={item} />)}
+                    {menuItems.map((item) => <MenuCard key={item.id} item={item} restaurant={restaurant} />)}
                 </div>
             </section>
         </div>

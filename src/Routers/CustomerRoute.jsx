@@ -8,6 +8,7 @@ import Home from '../component/Home/Home'
 import Auth from '../component/Auth/Auth'
 import ProtectedRoute from './ProtectedRoute'
 import PartnerApplication from '../component/Partner/PartnerApplication'
+import GuestCartMerge from '../component/Cart/GuestCartMerge'
 
 const CustomerRoute = () => {
   return (
@@ -17,14 +18,8 @@ const CustomerRoute = () => {
         <Route path='/' element={<Home />} />
         <Route path='/account/:register' element={<Home />} />
         <Route path='/restaurant/:city/:title/:id' element={<RestaurantDetails />} />
-        <Route
-          path='/cart'
-          element={
-            <ProtectedRoute>
-              <Cart />
-            </ProtectedRoute>
-          }
-        />
+        {/* Visitors can view and edit their cart; signing in is asked for at checkout. */}
+        <Route path='/cart' element={<Cart />} />
         <Route
           path='/my-profile/*'
           element={
@@ -43,6 +38,7 @@ const CustomerRoute = () => {
         />
       </Routes>
       <Auth />
+      <GuestCartMerge />
     </div>
   )
 }

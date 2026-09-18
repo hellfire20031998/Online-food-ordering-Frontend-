@@ -15,3 +15,22 @@ export const tokenAuthorities = () => {
 };
 
 export const hasTokenAuthority = (role) => tokenAuthorities().includes(role);
+
+// Where to send the user after they sign in (e.g. back to the cart). Session-scoped.
+const REDIRECT_KEY = "postLoginRedirect";
+
+export const setPostLoginRedirect = (path) => {
+  try {
+    if (path && path.startsWith("/") && !path.startsWith("/account/")) sessionStorage.setItem(REDIRECT_KEY, path);
+  } catch { /* ignore */ }
+};
+
+export const peekPostLoginRedirect = () => {
+  try { return sessionStorage.getItem(REDIRECT_KEY); } catch { return null; }
+};
+
+export const consumePostLoginRedirect = () => {
+  const path = peekPostLoginRedirect();
+  try { sessionStorage.removeItem(REDIRECT_KEY); } catch { /* ignore */ }
+  return path;
+};

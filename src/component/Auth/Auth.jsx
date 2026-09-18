@@ -4,7 +4,7 @@ import React from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import RegisterForm from './RegisterForm';
 import LoginForm from './LoginForm';
-import { consumePostLoginRedirect } from '../config/session';
+import { consumePostLoginRedirect, isPublicPath } from '../config/session';
 
 const style = {
     position: 'absolute',
@@ -23,9 +23,11 @@ const Auth = () => {
     const location = useLocation();
     const navigate = useNavigate();
 
-    // Closing without signing in returns the visitor to where they were (e.g. the cart).
+    // Closing without signing in returns the visitor to where they were (e.g. the cart), but never
+    // to a protected page: its guard would reopen this modal at once.
     const handleOnClose = () => {
-        navigate(consumePostLoginRedirect() || "/")
+        const returnTo = consumePostLoginRedirect()
+        navigate(isPublicPath(returnTo) ? returnTo : "/", { replace: true })
     }
 
     return (

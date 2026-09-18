@@ -34,3 +34,9 @@ export const consumePostLoginRedirect = () => {
   try { sessionStorage.removeItem(REDIRECT_KEY); } catch { /* ignore */ }
   return path;
 };
+
+// Pages a visitor may open without signing in. Anything else is behind ProtectedRoute and would
+// bounce a signed-out visitor straight back to the login modal.
+const PROTECTED_PREFIXES = ["/my-profile", "/partner", "/admin", "/team"];
+export const isPublicPath = (path) =>
+  Boolean(path) && !PROTECTED_PREFIXES.some((p) => path === p || path.startsWith(p + "/"));

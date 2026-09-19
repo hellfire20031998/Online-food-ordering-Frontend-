@@ -7,6 +7,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useDispatch } from 'react-redux';
 import { CategorizeIngredients } from '../util/CategorizeIngredients';
 import { addItemToCart } from '../State/Cart/Action';
+import { secureUrl } from '../util/secureUrl';
 
 /** One dish on the restaurant page. `restaurant` is the restaurant being viewed. */
 const MenuCard = ({ item, restaurant }) => {
@@ -72,7 +73,7 @@ const MenuCard = ({ item, restaurant }) => {
                     <div className='lg:flex items-center justify-between w-full'>
                         <div className='lg:flex items-center lg:gap-5'>
                             {item.images?.[0] && (
-                                <img className='w-[7rem] h-[7rem] object-cover rounded' src={item.images[0]} alt='' />
+                                <img className='w-[7rem] h-[7rem] object-cover rounded' src={secureUrl(item.images[0])} alt='' />
                             )}
                             <div className='space-y-1 lg:space-y-5 lg:max-w-2xl'>
                                 <p className='font-semibold text-xl'>{item.name}</p>

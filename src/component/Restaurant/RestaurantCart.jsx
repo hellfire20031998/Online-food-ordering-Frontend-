@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { addToFavorite } from '../State/Authentication/Action';
 import { isPresentInFavorites } from '../config/logic';
 import { setPostLoginRedirect } from '../config/session';
+import { secureUrl } from '../util/secureUrl';
 
 const RestaurantCart = ({ item }) => {
     const navigate = useNavigate();
@@ -33,9 +34,9 @@ const RestaurantCart = ({ item }) => {
 
     return (
         <Card className='w-[18rem]'>
-            <div className={`${item.open ? 'cursor-pointer' : 'cursor-not-allowed'} relative`}>
+            <div className={`${item.open ? 'cursor-pointer' : 'cursor-not-allowed'} relative`} onClick={handleNavigateToRestaurant}>
                 <img className='w-full h-[10rem] rounded-t-md object-cover'
-                    src={item.images?.[0]} alt='' />
+                    src={secureUrl(item.images?.[0])} alt='' />
 
                 <Chip
                     size='small'

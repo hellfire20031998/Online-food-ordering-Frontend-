@@ -1,5 +1,6 @@
-import { Divider, FormControl, FormControlLabel, Grid, Radio, RadioGroup, Typography } from '@mui/material'
-import React, { useEffect, useState } from 'react'
+import { Alert, Button, CircularProgress, Divider, FormControl, FormControlLabel, Grid, Radio, RadioGroup, Typography } from '@mui/material'
+import React, { useCallback, useEffect, useState } from 'react'
+import { secureUrl } from '../util/secureUrl';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import MenuCard from './MenuCard';
@@ -22,6 +23,8 @@ const RestaurantDetails = () => {
     const restaurant = useSelector(store => store.restaurant.restaurant)
     const categories = useSelector(store => store.restaurant.categories)
     const menuItems = useSelector(store => store.menu.menuItems)
+    const menuLoading = useSelector(store => store.menu.loading)
+    const menuError = useSelector(store => store.menu.error)
 
     const { id } = useParams();
 
@@ -38,7 +41,7 @@ const RestaurantDetails = () => {
         dispatch(getRestaurantsCategory({ restaurantId: id }))
     }, [dispatch, id])
 
-    useEffect(() => {
+    const loadMenu = useCallback(() => {
         dispatch(getMenuItemsByRestaurantId({
             restaurantId: id,
             vegetarian: foodType === "vegetarian",
@@ -47,6 +50,10 @@ const RestaurantDetails = () => {
             foodCategory: selectedCategory,
         }))
     }, [dispatch, id, selectedCategory, foodType])
+
+    useEffect(() => {
+        loadMenu()
+    }, [loadMenu])
 
     return (
         <div className='px-5 lg:px-20'>
@@ -58,7 +65,7 @@ const RestaurantDetails = () => {
                     <Grid container spacing={2}>
                         {restaurant?.images?.map((imgUrl, index) => (
                             <Grid item xs={12} lg={index === 0 ? 12 : 6} key={imgUrl}>
-                                <img className='w-full h-[40vh] object-cover' src={imgUrl} alt={`restaurant-img-${index}`} />
+                                <img className='w-full h-[40vh] object-cover' src={secureUrl(imgUrl)} alt={`restaurant-img-${index}`} />
                             </Grid>
                         ))}
                     </Grid>
@@ -116,6 +123,27 @@ const RestaurantDetails = () => {
                 </div>
 
                 <div className='space-y-5 lg:w-[80%] lg:pl-10'>
+                    {menuLoading && menuItems.length === 0 && (
+                        <div className='flex items-center gap-3 text-gray-400 py-10'>
+                            <CircularProgress size={22} />
+                            <span>Loading menu…</span>
+                        </div>
+                    )}
+                    {menuError && (
+                        <Alert
+                            severity='error'
+                            action={<Button color='inherit' size='small' onClick={loadMenu}>Retry</Button>}
+                        >
+                            {menuError}
+                        </Alert>
+                    )}
+                    {!menuLoading && !menuError && menuItems.length === 0 && (
+                        <Typography color='text.secondary' sx={{ py: 6 }}>
+                            {foodType !== 'all' || selectedCategory
+                                ? 'No dishes match these filters. Try "All" or another category.'
+                                : 'This restaurant has not added any dishes yet.'}
+                        </Typography>
+                    )}
                     {menuItems.map((item) => <MenuCard key={item.id} item={item} restaurant={restaurant} />)}
                 </div>
             </section>

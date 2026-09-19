@@ -11,8 +11,12 @@ export const createMenuItem = ({ menu }) => async (dispatch) => {
     }
 };
 
+// Filters can change faster than the API answers; only the newest request may update the list.
+let latestMenuRequest = 0;
+
 // Public endpoint.
 export const getMenuItemsByRestaurantId = (reqData) => async (dispatch) => {
+    const requestId = ++latestMenuRequest;
     dispatch({ type: GET_MENU_ITEMS_BY_RESTAURANT_ID_REQUEST });
     try {
         const { data } = await api.get(`api/food/restaurant/${reqData.restaurantId}`, {
@@ -23,8 +27,10 @@ export const getMenuItemsByRestaurantId = (reqData) => async (dispatch) => {
                 foodCategory: reqData.foodCategory,
             },
         });
+        if (requestId !== latestMenuRequest) return; // a newer filter/restaurant superseded this one
         dispatch({ type: GET_MENU_ITEMS_BY_RESTAURANT_ID_SUCCESS, payload: data });
     } catch (error) {
+        if (requestId !== latestMenuRequest) return;
         dispatch({ type: GET_MENU_ITEMS_BY_RESTAURANT_ID_FAILURE, payload: getErrorMessage(error, "Could not load menu") });
     }
 };

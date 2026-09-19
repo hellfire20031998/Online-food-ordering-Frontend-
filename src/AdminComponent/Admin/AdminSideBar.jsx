@@ -5,62 +5,93 @@ import FastfoodIcon from '@mui/icons-material/Fastfood';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import LogoutIcon from '@mui/icons-material/Logout';
 import PaymentsIcon from '@mui/icons-material/Payments';
-import { Divider, Drawer, useMediaQuery } from '@mui/material';
+import { Box, Divider, Drawer, List, ListItemButton, ListItemIcon, ListItemText, Typography } from '@mui/material';
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../component/State/Authentication/Action';
 
+export const ADMIN_DRAWER_WIDTH = 240;
+
 const menu = [
-  { title: "Dashboard", icon: <Dashboard />, path: "/" },
+  { title: "Dashboard", icon: <Dashboard />, path: "", exact: true },
   { title: "Orders", icon: <ShoppingBag />, path: "/orders" },
   { title: "Menu", icon: <ShopTwoIcon />, path: "/menu" },
   { title: "Food Category", icon: <CategoryIcon />, path: "/category" },
   { title: "Ingredient", icon: <FastfoodIcon />, path: "/ingredients" },
   { title: "Details", icon: <AdminPanelSettingsIcon />, path: "/details" },
   { title: "Payouts", icon: <PaymentsIcon />, path: "/payouts" },
-  { title: "Logout", icon: <LogoutIcon />, path: "/" },
 ];
 
-export default function AdminSideBar({ handleClose }) {
-  const isSmallScreen = useMediaQuery("(max-width:1080px)");
+/**
+ * Restaurant owner navigation: permanent on large screens, a slide-in drawer on smaller ones
+ * (opened from the bar in Admin).
+ */
+export default function AdminSideBar({ mobileOpen, onClose }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
+  const restaurant = useSelector(store => store.restaurant.usersRestaurant);
 
-  const handleNavigation = (item) => {
-    if (item.title === 'Logout') {
-      dispatch(logout())
-      navigate('/')
-    } else {
-      navigate(`/admin/restaurant${item.path}`)
-    }
-    if (isSmallScreen && handleClose) {
-      handleClose(); // Close drawer on mobile
-    }
+  const fullPath = (item) => `/admin/restaurant${item.path}`;
+  const isActive = (item) => item.exact ? location.pathname === fullPath(item) : location.pathname.startsWith(fullPath(item));
+
+  const go = (item) => {
+    navigate(fullPath(item));
+    onClose?.();
   };
 
-  return (
-    <Drawer
-      variant={isSmallScreen ? 'temporary' : 'permanent'}
-      onClose={handleClose}
-      open={true}
-      anchor="left"
-      sx={{ zIndex: 1 }}
-    >
-      <div className="w-[70vw] lg:w-[20vw] h-screen flex flex-col text-xl overflow-auto p-4 space-y-[1.65rem]">
-        {menu.map((item, index) => (
-          <React.Fragment key={item.title}>
-            <div
-              className="flex items-center space-x-2 cursor-pointer hover:bg-gray-100 rounded-md px-3 py-2 transition-all gap-5"
-              onClick={() => handleNavigation(item)}
-            >
-              {item.icon}
-              <span>{item.title}</span>
-            </div>
-            {index !== menu.length - 1 && <Divider />}
-          </React.Fragment>
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate('/');
+  };
+
+  const content = (
+    <Box sx={{ width: ADMIN_DRAWER_WIDTH, display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <Box sx={{ p: 2.5 }}>
+        <Typography variant="h6" fontWeight={700} noWrap>{restaurant?.name || 'Restaurant'}</Typography>
+        <Typography variant="caption" color="text.secondary">Owner dashboard</Typography>
+      </Box>
+      <Divider />
+      <List sx={{ flex: 1 }}>
+        {menu.map((item) => (
+          <ListItemButton key={item.title} selected={isActive(item)} onClick={() => go(item)}>
+            <ListItemIcon>{item.icon}</ListItemIcon>
+            <ListItemText primary={item.title} />
+          </ListItemButton>
         ))}
-      </div>
-    </Drawer>
+      </List>
+      <Divider />
+      <ListItemButton onClick={handleLogout}>
+        <ListItemIcon><LogoutIcon /></ListItemIcon>
+        <ListItemText primary="Logout" />
+      </ListItemButton>
+    </Box>
+  );
+
+  return (
+    <>
+      {/* Small screens */}
+      <Drawer
+        variant="temporary"
+        open={Boolean(mobileOpen)}
+        onClose={onClose}
+        ModalProps={{ keepMounted: true }}
+        sx={{ display: { xs: 'block', lg: 'none' } }}
+      >
+        {content}
+      </Drawer>
+      {/* Large screens */}
+      <Drawer
+        variant="permanent"
+        open
+        sx={{
+          display: { xs: 'none', lg: 'block' },
+          '& .MuiDrawer-paper': { width: ADMIN_DRAWER_WIDTH, boxSizing: 'border-box' },
+        }}
+      >
+        {content}
+      </Drawer>
+    </>
   );
 }

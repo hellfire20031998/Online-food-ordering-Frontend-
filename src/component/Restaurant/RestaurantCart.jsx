@@ -9,6 +9,7 @@ import { isPresentInFavorites } from '../config/logic';
 import { setPostLoginRedirect } from '../config/session';
 import { secureUrl } from '../util/secureUrl';
 
+/** Restaurant tile for the home grid. Fills its grid cell on every screen size. */
 const RestaurantCart = ({ item }) => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
@@ -16,7 +17,8 @@ const RestaurantCart = ({ item }) => {
 
     const isFavorite = isPresentInFavorites(favorites, item);
 
-    const handleAddToFavourite = () => {
+    const handleAddToFavourite = (e) => {
+        e.stopPropagation();
         if (!localStorage.getItem("jwt")) {
             // Favourites belong to an account: ask the visitor to sign in and come back here.
             setPostLoginRedirect(window.location.pathname);
@@ -28,16 +30,18 @@ const RestaurantCart = ({ item }) => {
 
     const handleNavigateToRestaurant = () => {
         if (item.open) {
-            navigate(`/restaurant/${item.address.city}/${item.name}/${item.id}`)
+            navigate(`/restaurant/${item.address?.city || 'city'}/${item.name}/${item.id}`)
         }
     }
 
     return (
-        <Card className='w-[18rem]'>
-            <div className={`${item.open ? 'cursor-pointer' : 'cursor-not-allowed'} relative`} onClick={handleNavigateToRestaurant}>
-                <img className='w-full h-[10rem] rounded-t-md object-cover'
-                    src={secureUrl(item.images?.[0])} alt='' />
-
+        <Card
+            className={`w-full h-full flex flex-col ${item.open ? 'cursor-pointer' : 'cursor-not-allowed opacity-80'}`}
+            onClick={handleNavigateToRestaurant}
+        >
+            <div className='relative'>
+                <img className='w-full h-40 sm:h-44 rounded-t-md object-cover'
+                    src={secureUrl(item.images?.[0])} alt={item.name} />
                 <Chip
                     size='small'
                     className='absolute top-2 left-2'
@@ -46,18 +50,18 @@ const RestaurantCart = ({ item }) => {
                 />
             </div>
 
-            <div className='p-4 textPart lg:flex w-full justify-between'>
-                <div className='space-y-1'>
-                    <p onClick={handleNavigateToRestaurant} className='font-semibold text-lg cursor-pointer'>{item.name}</p>
-                    <p className='text-gray-500 text-sm'>
-                        {item.description}
-                    </p>
-                </div>
+            <div className='p-4 flex-1 flex flex-col gap-1'>
+                <p className='font-semibold text-lg leading-tight'>{item.name}</p>
+                {item.cuisineType && <p className='text-gray-400 text-xs uppercase tracking-wide'>{item.cuisineType}</p>}
+                <p className='text-gray-500 text-sm line-clamp-2'>
+                    {item.description}
+                </p>
             </div>
 
-            <div>
-                <IconButton onClick={handleAddToFavourite}>
-                    {isFavorite ? <FavoriteIcon /> : <FavoriteBorderIcon />}
+            <div className='px-2 pb-2 flex items-center justify-between'>
+                <span className='text-gray-500 text-sm px-2'>{item.address?.city}</span>
+                <IconButton onClick={handleAddToFavourite} aria-label='Toggle favourite'>
+                    {isFavorite ? <FavoriteIcon color='primary' /> : <FavoriteBorderIcon />}
                 </IconButton>
             </div>
         </Card>

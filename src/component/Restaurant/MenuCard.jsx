@@ -70,16 +70,14 @@ const MenuCard = ({ item, restaurant }) => {
                     aria-controls={`menu-item-${item.id}-content`}
                     id={`menu-item-${item.id}-header`}
                 >
-                    <div className='lg:flex items-center justify-between w-full'>
-                        <div className='lg:flex items-center lg:gap-5'>
-                            {item.images?.[0] && (
-                                <img className='w-[7rem] h-[7rem] object-cover rounded' src={secureUrl(item.images[0])} alt='' />
-                            )}
-                            <div className='space-y-1 lg:space-y-5 lg:max-w-2xl'>
-                                <p className='font-semibold text-xl'>{item.name}</p>
-                                <p>₹{Number(item.price ?? 0).toFixed(2)}</p>
-                                <p className='text-gray-400'>{item.description}</p>
-                            </div>
+                    <div className='flex items-start gap-4 w-full pr-2'>
+                        {item.images?.[0] && (
+                            <img className='w-20 h-20 sm:w-28 sm:h-28 flex-none object-cover rounded' src={secureUrl(item.images[0])} alt='' />
+                        )}
+                        <div className='space-y-1 min-w-0'>
+                            <p className='font-semibold text-lg sm:text-xl leading-tight'>{item.name}</p>
+                            <p className='text-sm sm:text-base'>₹{Number(item.price ?? 0).toFixed(2)}</p>
+                            <p className='text-gray-400 text-sm line-clamp-2 sm:line-clamp-none'>{item.description}</p>
                         </div>
                     </div>
                 </AccordionSummary>

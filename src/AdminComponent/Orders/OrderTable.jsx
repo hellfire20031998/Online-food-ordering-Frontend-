@@ -48,7 +48,7 @@ export default function OrderTable({ filterValue }) {
 
   return (
     <Box>
-      <Card className='m'>
+      <Card>
         <CardHeader title="All Orders" sx={{ paddingTop: 2, alignItems: 'center' }} />
         <TableContainer component={Paper}>
           <Table sx={{ minWidth: 650 }} aria-label="orders table">

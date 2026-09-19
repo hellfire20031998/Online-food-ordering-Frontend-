@@ -25,7 +25,7 @@ const FavoriteRestaurantCart = ({ item }) => {
     }
 
     return (
-        <Card className='w-[18rem]'>
+        <Card className='w-full sm:w-[18rem]'>
             <div className={`${item.open ? 'cursor-pointer' : 'cursor-not-allowed'} relative`}>
                 <img className='w-full h-[10rem] rounded-t-md object-cover'
                     src={item.images} alt='' />

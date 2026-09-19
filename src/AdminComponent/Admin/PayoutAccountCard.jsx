@@ -109,9 +109,9 @@ export default function PayoutAccountCard({ restaurantId }) {
 
 function Row({ label, value }) {
   return (
-    <div className="flex">
-      <p className="w-48">{label}</p>
-      <p className="text-gray-400"><span className="pr-5">-</span>{value}</p>
+    <div className="flex flex-col sm:flex-row sm:gap-4 py-1">
+      <p className="sm:w-40 flex-none text-gray-400 text-sm sm:text-base">{label}</p>
+      <p className="text-gray-200 break-all">{value}</p>
     </div>
   );
 }

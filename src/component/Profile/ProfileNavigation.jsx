@@ -1,59 +1,69 @@
-import { Drawer, useMediaQuery, Divider } from '@mui/material';
+import { Drawer, Divider, List, ListItemButton, ListItemIcon, ListItemText, useMediaQuery, useTheme } from '@mui/material';
 import React from 'react';
 import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import HomeIcon from '@mui/icons-material/Home';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+import PersonIcon from '@mui/icons-material/Person';
 import LogoutIcon from '@mui/icons-material/Logout';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { logout } from '../State/Authentication/Action';
 
-const menu = [
+export const PROFILE_MENU = [
+  { title: "Profile", icon: <PersonIcon />, path: "/my-profile", exact: true },
   { title: "Orders", icon: <ShoppingBagIcon />, path: "/my-profile/orders" },
   { title: "Favorites", icon: <FavoriteIcon />, path: "/my-profile/favorites" },
   { title: "Refund account", icon: <AccountBalanceIcon />, path: "/my-profile/refund-account" },
   { title: "Home", icon: <HomeIcon />, path: "/" },
-  { title: "Logout", icon: <LogoutIcon />, path: "/" }
 ];
 
+/**
+ * Profile section navigation: a permanent side column on large screens, a slide-in drawer on
+ * smaller ones (opened from the bar in Profile).
+ */
 export const ProfileNavigation = ({ open, handleClose }) => {
-  const isSmallScreen = useMediaQuery("(max-width:620px)");
-
+  const theme = useTheme();
+  const isLarge = useMediaQuery(theme.breakpoints.up('lg'));
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
 
-  const handleNavigate = (item) => {
-    if (item.title === "Logout") {
-      dispatch(logout())
-      navigate('/')
-    } else {
-      navigate(item.path)
-    }
-    if (isSmallScreen && handleClose) {
-      handleClose();
-    }
+  const isActive = (item) => item.exact ? location.pathname === item.path : location.pathname.startsWith(item.path) && item.path !== '/';
+
+  const go = (path) => {
+    navigate(path);
+    handleClose?.();
+  };
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate('/');
+  };
+
+  const content = (
+    <List sx={{ width: 260, pt: 2 }}>
+      {PROFILE_MENU.map((item) => (
+        <ListItemButton key={item.title} selected={isActive(item)} onClick={() => go(item.path)}>
+          <ListItemIcon>{item.icon}</ListItemIcon>
+          <ListItemText primary={item.title} />
+        </ListItemButton>
+      ))}
+      <Divider sx={{ my: 1 }} />
+      <ListItemButton onClick={handleLogout}>
+        <ListItemIcon><LogoutIcon /></ListItemIcon>
+        <ListItemText primary="Logout" />
+      </ListItemButton>
+    </List>
+  );
+
+  if (isLarge) {
+    return <aside className='w-[260px] flex-none border-r border-white/10 min-h-[80vh]'>{content}</aside>;
   }
 
   return (
-    <Drawer
-      variant={isSmallScreen ? "temporary" : "permanent"}
-      open={isSmallScreen ? open : true}
-      onClose={handleClose}
-      anchor="left"
-      sx={{ zIndex: -1, position: 'sticky' }}
-    >
-      <div className="w-[50vw] lg:w-[20vw] h-[100vh] flex flex-col justify-center text-xl gap-8 pt-16">
-        {menu.map((item, index) => (
-          <React.Fragment key={item.title}>
-            <div onClick={() => handleNavigate(item)} className="px-5 flex items-center space-x-5 cursor-pointer rounded-md">
-              {item.icon}
-              <span>{item.title}</span>
-            </div>
-            {index !== menu.length - 1 && <Divider />}
-          </React.Fragment>
-        ))}
-      </div>
+    <Drawer anchor="left" open={Boolean(open)} onClose={handleClose} ModalProps={{ keepMounted: true }}>
+      {content}
     </Drawer>
   );
 };

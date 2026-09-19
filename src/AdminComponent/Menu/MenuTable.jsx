@@ -64,7 +64,7 @@ export default function MenuTable() {
         />
 
         <TableContainer component={Paper}>
-          <Table>
+          <Table sx={{ minWidth: 650 }}>
             <TableHead>
               <TableRow>
                 <TableCell>Image</TableCell>

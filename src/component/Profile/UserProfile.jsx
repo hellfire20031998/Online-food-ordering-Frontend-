@@ -16,7 +16,7 @@ const UserProfile = () => {
   }
 
   return (
-    <div className='min-h-[80vh] flex flex-col justify-center items-center text-center'>
+    <div className='min-h-[50vh] lg:min-h-[80vh] flex flex-col justify-center items-center text-center px-4'>
       <div className='flex flex-col items-center justify-center'>
         <AccountCircleIcon sx={{ fontSize: "9rem" }} />
         <h1 className='py-5 text-2xl font-semibold'>{user?.fullName || "Guest"}</h1>

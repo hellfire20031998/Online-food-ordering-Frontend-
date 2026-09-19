@@ -35,30 +35,28 @@ const Home = () => {
   return (
     <div className="pb-10">
       {/* Banner Section */}
-      <section className="banner z-50 relative flex flex-col justify-center items-center text-center px-5 lg:px-0">
-        <div className="w-full sm:w-[70vw] md:w-[60vw] lg:w-[50vw] z-10">
-          <p className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold z-10 py-5">
+      <section className="banner relative flex flex-col justify-center items-center text-center px-5">
+        <div className="cover absolute inset-0"></div>
+        <div className="relative w-full sm:w-[70vw] md:w-[60vw] lg:w-[50vw]">
+          <p className="text-4xl sm:text-5xl lg:text-6xl font-bold py-4">
             Foodiyapa
           </p>
-          <p className="z-10 text-gray-300 text-lg sm:text-xl md:text-2xl lg:text-3xl">
+          <p className="text-gray-200 text-base sm:text-xl lg:text-2xl">
             Taste the convenience: Food, Fast, and Delivered
           </p>
         </div>
-
-        <div className="cover absolute top-0 left-0 right-0"></div>
-        <div className="fadout"></div>
       </section>
 
       {/* Top Meals Section */}
-      <section className="p-5 sm:p-10 lg:py-10 lg:px-20">
-        <p className="text-xl sm:text-2xl font-semibold text-gray-400 py-3 pb-10">
+      <section className="px-4 py-8 sm:px-10 lg:px-20">
+        <p className="text-xl sm:text-2xl font-semibold text-gray-400 pb-6">
           Top Meals
         </p>
         <MultiItemCarousel />
       </section>
 
       {/* Handpicked Favorites Section */}
-      <section className="px-5 sm:px-10 lg:px-20 pt-10">
+      <section className="px-4 sm:px-10 lg:px-20 pt-6">
         <h1 className="text-xl sm:text-2xl font-semibold text-gray-400 pb-5">
           Order from Handpicked Favorites
         </h1>
@@ -82,7 +80,7 @@ const Home = () => {
           <p className="text-gray-400 py-10">No restaurants are listed yet. Please check back soon.</p>
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 justify-center">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
           {orderedRestaurants.map((item) => (
             <RestaurantCart key={item.id} item={item} />
           ))}

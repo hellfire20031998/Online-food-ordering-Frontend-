@@ -36,8 +36,8 @@ export default function OwnerPayouts() {
   const cur = earnings.currency;
 
   return (
-    <div className="lg:px-20 px-5 pb-10">
-      <h1 className="text-2xl lg:text-4xl font-bold py-6">Earnings & payouts</h1>
+    <div className="pb-10">
+      <h1 className="text-2xl lg:text-3xl font-bold py-4">Earnings & payouts</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
         <Stat title="Awaiting next payout" value={formatMoney(earnings.unsettledNet, cur)}

@@ -207,7 +207,7 @@ const Cart = () => {
         <>
             <main className="lg:flex justify-between">
                 {/* LEFT PANEL */}
-                <section className="lg:w-[30%] space-y-6 lg:min-h-screen pt-10">
+                <section className="lg:w-[35%] xl:w-[30%] space-y-6 lg:min-h-screen pt-6 lg:pt-10">
                     {restaurantName && (
                         <p className="px-5 text-gray-400 text-sm">Ordering from <span className="text-white">{restaurantName}</span></p>
                     )}
@@ -288,12 +288,12 @@ const Cart = () => {
                     </div>
                 </section>
 
-                <Divider orientation="vertical" flexItem />
+                <Divider orientation="vertical" flexItem className="hidden lg:block" />
 
                 {/* RIGHT PANEL */}
-                <section className="lg:w-[70%] flex justify-center px-5 pb-10 lg:pb-0">
+                <section className="lg:w-[65%] xl:w-[70%] flex justify-center px-4 sm:px-5 pb-10 lg:pb-0">
                     {isGuest ? (
-                        <div className="py-16 text-center space-y-4 max-w-md">
+                        <div className="hidden lg:block py-16 text-center space-y-4 max-w-md">
                             <h1 className="font-semibold text-2xl">Almost there</h1>
                             <p className="text-gray-400">
                                 Sign in or create an account to choose a delivery address and pay. Browsing and building your cart never needs an account.

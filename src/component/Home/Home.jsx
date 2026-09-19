@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import "./Home.css";
 import MultiItemCarousel from "./MultiItemCarousel";
 import RestaurantCart from "../Restaurant/RestaurantCart";
@@ -8,6 +8,13 @@ import { getAllRestaurantsAction } from "../State/Restaurant/Action";
 const Home = () => {
   const dispatch = useDispatch();
   const restaurants = useSelector(store => store.restaurant.restaurants);
+
+  // Open restaurants first, closed ones last; the API already orders this way, this keeps it
+  // stable if the list was loaded from elsewhere.
+  const orderedRestaurants = useMemo(
+    () => [...restaurants].sort((a, b) => Number(Boolean(b.open)) - Number(Boolean(a.open))),
+    [restaurants]
+  );
 
   useEffect(() => {
     // Public endpoint — browsing restaurants does not require a login.
@@ -46,7 +53,7 @@ const Home = () => {
         </h1>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 justify-center">
-          {restaurants.map((item) => (
+          {orderedRestaurants.map((item) => (
             <RestaurantCart key={item.id} item={item} />
           ))}
         </div>

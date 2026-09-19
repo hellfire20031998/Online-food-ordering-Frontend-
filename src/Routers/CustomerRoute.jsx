@@ -9,6 +9,7 @@ import Auth from '../component/Auth/Auth'
 import ProtectedRoute from './ProtectedRoute'
 import PartnerApplication from '../component/Partner/PartnerApplication'
 import GuestCartMerge from '../component/Cart/GuestCartMerge'
+import Search from '../component/Search/Search'
 
 const CustomerRoute = () => {
   return (
@@ -18,6 +19,7 @@ const CustomerRoute = () => {
         <Route path='/' element={<Home />} />
         <Route path='/account/:register' element={<Home />} />
         <Route path='/restaurant/:city/:title/:id' element={<RestaurantDetails />} />
+        <Route path='/search' element={<Search />} />
         {/* Visitors can view and edit their cart; signing in is asked for at checkout. */}
         <Route path='/cart' element={<Cart />} />
         <Route

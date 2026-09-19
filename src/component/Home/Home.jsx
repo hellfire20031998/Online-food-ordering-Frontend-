@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { Alert, Button, CircularProgress } from "@mui/material";
 import "./Home.css";
 import MultiItemCarousel from "./MultiItemCarousel";
 import RestaurantCart from "../Restaurant/RestaurantCart";
@@ -8,6 +9,16 @@ import { getAllRestaurantsAction } from "../State/Restaurant/Action";
 const Home = () => {
   const dispatch = useDispatch();
   const restaurants = useSelector(store => store.restaurant.restaurants);
+  const loading = useSelector(store => store.restaurant.loading);
+  const error = useSelector(store => store.restaurant.error);
+  const [slow, setSlow] = useState(false);
+
+  // The hosted API sleeps when idle; its first answer can take a while. Say so after a few seconds.
+  useEffect(() => {
+    if (!loading || restaurants.length > 0) { setSlow(false); return undefined; }
+    const t = setTimeout(() => setSlow(true), 4000);
+    return () => clearTimeout(t);
+  }, [loading, restaurants.length]);
 
   // Open restaurants first, closed ones last; the API already orders this way, this keeps it
   // stable if the list was loaded from elsewhere.
@@ -51,6 +62,25 @@ const Home = () => {
         <h1 className="text-xl sm:text-2xl font-semibold text-gray-400 pb-5">
           Order from Handpicked Favorites
         </h1>
+
+        {loading && restaurants.length === 0 && (
+          <div className="flex items-center gap-3 text-gray-400 py-10">
+            <CircularProgress size={22} />
+            <span>{slow ? "Waking up the kitchen… the first load can take up to a minute." : "Loading restaurants…"}</span>
+          </div>
+        )}
+        {error && restaurants.length === 0 && (
+          <Alert
+            severity="error"
+            sx={{ maxWidth: 560 }}
+            action={<Button color="inherit" size="small" onClick={() => dispatch(getAllRestaurantsAction())}>Retry</Button>}
+          >
+            {error}
+          </Alert>
+        )}
+        {!loading && !error && restaurants.length === 0 && (
+          <p className="text-gray-400 py-10">No restaurants are listed yet. Please check back soon.</p>
+        )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 justify-center">
           {orderedRestaurants.map((item) => (

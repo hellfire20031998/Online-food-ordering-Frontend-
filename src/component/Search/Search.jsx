@@ -52,7 +52,9 @@ export default function Search() {
 
   return (
     <div className="px-4 sm:px-10 lg:px-20 py-6 lg:py-10 max-w-6xl mx-auto">
+      {/* Phones type here; on wider screens the navbar's search field is the input. */}
       <TextField
+        className="md:hidden"
         autoFocus
         fullWidth
         placeholder="Search restaurants, cuisines or dishes"

@@ -64,7 +64,7 @@ const Home = () => {
         {loading && restaurants.length === 0 && (
           <div className="flex items-center gap-3 text-gray-400 py-10">
             <CircularProgress size={22} />
-            <span>{slow ? "Waking up the kitchen… the first load can take up to a minute." : "Loading restaurants…"}</span>
+            <span>{slow ? "Waking up the kitchen… the first load can take a minute or two. Hang tight, we keep trying." : "Loading restaurants…"}</span>
           </div>
         )}
         {error && restaurants.length === 0 && (
